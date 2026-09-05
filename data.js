@@ -403,7 +403,7 @@ const DATA = {
       key: "helmet", label: "Helmet", cat: "armour.helmet", icon: "helmet",
       blurb: "The ES mastery doubles helmet ES, so base matters: Lich's Circlet (117–134) vs your Mind Cage (73–84). fubgun's is 98% ES + 57 flat with the reservation and mana-cost eldritch implicits, and rarity because he farms with Headhunter.",
       now: "Mind Cage: 85% ES, +52 ES, 8% reservation, 9% cast speed, fire/chaos res.",
-      target: { budget: "Lich's Circlet: 98% ES, +57 ES, 11% reservation + 32% mana cost efficiency (implicits), 49% rarity, fractured 60% rarity from rares, crafted fire+chaos", mirror: "same helmet, crafted fire+cold instead" },
+      target: { budget: "Lich's Circlet: 98% ES, +57 ES, 11% reservation + 32% mana cost efficiency (implicits), 49% rarity, fractured 60% rarity from rares, crafted fire+chaos", mirror: "Lich's Circlet: same helmet, crafted fire+cold instead" },
       status: { budget: "buy", mirror: "buy" },
       rare: {
         w: [["esPct", 1], ["esFlat", 0.8], ["resEffImpl", 4], ["resEff", 3], ["manaCostEffImpl", 0.4], ["allRes", 1.5], ["fireRes", 0.5], ["coldRes", 0.5], ["lightRes", 0.5], ["chaosRes", 0.6],
@@ -425,7 +425,7 @@ const DATA = {
       key: "body", label: "Body Armour", cat: "armour.chest", icon: "body",
       blurb: "You already own the base and a 117% ES roll. The gap is fubgun's fractured 57% Global Defences (that one line is ~a third of the ES difference) plus 126% ES, 33% golem buff effect and 12% phys taken as chaos on the implicits.",
       now: "Twilight Regalia: 117% ES, +125 ES, fractured +1 dex gems, 11% phys taken as cold, cold+chaos res, crafted 8% defence magnitudes.",
-      target: { budget: "Twilight Regalia: fractured 57% Global Defences, 126% ES, +115 ES, +1 dex gems, fire + cold res, implicits 33% golem buff effect + 12% phys taken as chaos, crafted 15% defence magnitudes", mirror: "identical" },
+      target: { budget: "Twilight Regalia: fractured 57% Global Defences, 126% ES, +115 ES, +1 dex gems, fire + cold res, implicits 33% golem buff effect + 12% phys taken as chaos, crafted 15% defence magnitudes", mirror: "Twilight Regalia: identical to budget" },
       status: { budget: "craft", mirror: "craft" },
       rare: {
         w: [["globalDefFr", 2], ["globalDef", 2], ["esPct", 1], ["esFlat", 0.5], ["golemBuffImpl", 2], ["physTakenChaosImpl", 1.5], ["dexGems", 15], ["dexGemsFr", 15],
@@ -446,7 +446,7 @@ const DATA = {
       key: "gloves", label: "Gloves", cat: "armour.gloves", icon: "gloves",
       blurb: "Warlock Gloves: fractured 50% damage vs chilled (temple mod), 97% ES, abyssal socket, 35% phys→lightning (unveiled) on top of the 25% eldritch implicit — with your tree's 40% that's full conversion — 25% unnerve on hit, crafted 15% herald effect. Your Arcanist Gloves have none of it.",
       now: "Arcanist Gloves: 85% ES, +37 ES, fire/light/chaos res, fire exposure implicit. No socket, no conversion, no chilled damage.",
-      target: { budget: "Warlock Gloves: fractured 50% vs chilled + fractured cold res, 97% ES, abyssal socket, 35% phys→lightning, 48% light res, implicits 25% conversion + 25% unnerve, crafted 15% herald effect", mirror: "identical" },
+      target: { budget: "Warlock Gloves: fractured 50% vs chilled + fractured cold res, 97% ES, abyssal socket, 35% phys→lightning, 48% light res, implicits 25% conversion + 25% unnerve, crafted 15% herald effect", mirror: "Warlock Gloves: identical to budget" },
       status: { budget: "craft", mirror: "craft" },
       rare: {
         w: [["chilledDmgFr", 2], ["chilledDmg", 2], ["esPct", 1], ["esFlat", 0.5], ["abyssSocket", 25], ["physToLight", 1.5], ["physToLightImpl", 1.5], ["unnerveImpl", 1],
@@ -497,7 +497,7 @@ const DATA = {
       key: "amulet", label: "Amulet", cat: "accessory.amulet", icon: "amulet",
       blurb: "Focused Amulet: one prefix, one suffix, both doubled. fubgun's is +2 all gems / +2 physical gems / +90% multi with Disciple of the Slaughter anointed. Biggest single DPS item on the page and a craft (waggles' video in the notes). Your Citrine has +1 gems and +36% multi.",
       now: "Citrine Amulet: +1 all gems, +36% multi, +49 ES, +17 str/dex, cold res, mana leech, phys to attacks. Disciple of the Slaughter anointed.",
-      target: { budget: "Focused Amulet: +2 all skill gems, +2 physical skill gems, +90% global crit multi, Disciple of the Slaughter", mirror: "identical" },
+      target: { budget: "Focused Amulet: +2 all skill gems, +2 physical skill gems, +90% global crit multi, Disciple of the Slaughter", mirror: "Focused Amulet: identical to budget" },
       status: { budget: "craft", mirror: "craft" },
       rare: {
         w: [["allGems", 60], ["physGems", 40], ["spellGems", 40], ["critMulti", 2], ["critMultiSpell", 1.5], ["esFlatG", 0.3], ["int", 0.2], ["castSpeed", 1], ["spellDmg", 0.5]],
@@ -518,7 +518,7 @@ const DATA = {
       key: "ring", label: "Rings", cat: "accessory.ring", icon: "ring",
       blurb: "Both rings are uniques you already own. Lost Unity grants Herald of the Hive 30; Nimis returns the knives. Nothing to buy here unless you want a better Lost Unity roll.",
       now: "Lost Unity (7% def / 19% res / 39% chaos) + Nimis. Both slots done.",
-      target: { budget: "Lost Unity + Nimis (fubgun's Nimis is a foil — cosmetic)", mirror: "identical" },
+      target: { budget: "Lost Unity + Nimis: both owned. fubgun's Nimis is a foil — cosmetic", mirror: "Lost Unity + Nimis: identical to budget" },
       status: { budget: "have", mirror: "have" },
       rare: null,
       uniques: [
@@ -536,7 +536,7 @@ const DATA = {
       key: "belt", label: "Belt", cat: "accessory.belt", icon: "belt",
       blurb: "Headhunter. You own it. Done.",
       now: "Headhunter (catalysed: 56 str / 57 dex / 56 life).",
-      target: { budget: "Headhunter", mirror: "Headhunter" },
+      target: { budget: "Headhunter: owned, catalysed", mirror: "Headhunter: identical" },
       status: { budget: "have", mirror: "have" },
       rare: null,
       uniques: [
@@ -548,7 +548,7 @@ const DATA = {
       key: "flask", label: "Flasks", icon: "flask",
       blurb: "fubgun: Cinderswallow, Masochist's Quicksilver of the Kakapo, Wine of the Prophet, Stormblood, Rumi's. You have four of five; the life flask is a dead slot on Chaos Inoculation — Wine of the Prophet goes there.",
       now: "Divine Life Flask (dead on CI), Cinderswallow, Flagellant's Quicksilver of the Owl, Stormblood, Rumi's 8%/6%.",
-      target: { budget: "Cinderswallow · Quicksilver (curse effect) · Wine of the Prophet · Stormblood · Rumi's 12%", mirror: "identical" },
+      target: { budget: "Wine + Rumi's 12%: Cinderswallow · Quicksilver (curse effect) · Wine of the Prophet · Stormblood · Rumi's 12%", mirror: "Wine + Rumi's 12%: identical to budget" },
       status: { budget: "buy", mirror: "buy" },
       rare: null,
       uniques: [
@@ -570,7 +570,7 @@ const DATA = {
       key: "jewel", label: "Jewels", cat: "jewel", icon: "jewel",
       blurb: "Rare jewels: +3% attack block while wielding a staff, crit multi ×2, 7% max ES (fubgun runs three). Abyss: a Hypnotic Eye with spell chaos while two-handed + multi + ES for the glove socket and one cluster socket. Then the uniques and the cluster searches.",
       now: "Sublime Vision (Haste 40%), Apex Mode, Impossible Escape, Elegant Hubris (seed 30180), Stormshroud ×1, one rare (multi/ES/life), one bow-attack abyss jewel (wrong build).",
-      target: { budget: "3 rare block/multi/ES jewels · Hypnotic Eye (spell chaos 2H, multi, ES) ×2 · Forbidden Flame + Flesh (Vile Bastion) · Stormshroud ×2 · Sublime Vision · Apex Mode · Impossible Escape · Elegant Hubris seed 112060", mirror: "budget set + Voices (1 passive) ×2 + Foulborn Unnatural Instinct" },
+      target: { budget: "Block jewels + Hypnotic Eye: 3 rare block/multi/ES jewels · Hypnotic Eye (spell chaos 2H, multi, ES) ×2 · Forbidden Flame + Flesh (Vile Bastion) · Stormshroud ×2 · Sublime Vision · Apex Mode · Impossible Escape · Elegant Hubris seed 112060", mirror: "Voices ×2 + Foulborn UI: the budget set plus Voices (1 passive) ×2 and Foulborn Unnatural Instinct" },
       status: { budget: "buy", mirror: "buy" },
       rare: {
         w: [["staffBlock", 12], ["staffBlockB", 12], ["staffBlockFr", 12], ["staffBlockFrB", 12], ["critMulti", 1.5], ["critMultiSpell", 1.5], ["critMultiSpellFr", 1.5], ["esMaxPct", 3], ["spellDmg", 0.6], ["castSpeed", 1.2], ["esFlatG", 0.2]],
@@ -588,6 +588,7 @@ const DATA = {
       },
       abyss: {
         cat: "jewel.abyss",
+        blurb: "Hypnotic Eye for the Warlock Gloves socket and the medium-cluster socket at node 49080: added spell chaos (or lightning / physical) while wielding a two-handed weapon, crit multi, flat ES, ES regen. fubgun's is 22–33 chaos + 9% multi + 34 ES.",
         w: [["spellChaos2H", 2.5], ["spellLight2H", 2], ["spellPhys2H", 2], ["critMulti", 1.5], ["critMultiSpell", 1.5], ["esFlatG", 0.8], ["esRegen", 0.5], ["esRegenB", 0.5], ["avoidShock", 0.1], ["spellChaos", 1.5], ["spellPhys", 1.5]],
       },
       uniques: [

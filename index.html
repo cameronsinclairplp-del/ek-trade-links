@@ -1,137 +1,148 @@
 <!doctype html>
-<html lang="en" class="dark h-full bg-gray-950 scheme-dark">
+<html lang="en" class="dark h-full bg-canvas scheme-dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f1012" />
   <title>EK Elementalist · Trade Links</title>
   <meta name="description" content="Budget-aware Path of Exile trade links for an Ethereal Knives herald-stacking CI Elementalist: fubgun's budget and mirror PoBs as weighted-sum rare searches, craft-start searches, locked unique variants, gem links by gear piece and a ranked buy list." />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20 20 4M9 4l11 11M4 9l11 11'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3b3ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20 20 4M9 4l11 11M4 9l11 11'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://rsms.me/" />
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="h-full font-sans text-gray-100 antialiased">
-  <!-- Static sidebar (desktop) — Tailwind Plus "Simple dark sidebar", trimmed -->
-  <div class="hidden bg-gray-900 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
-    <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-white/10 px-6 dark:bg-black/10">
+<body class="h-full font-sans text-ink antialiased">
+  <a href="#slot" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:rounded-md focus:bg-accent focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">Skip to content</a>
+
+  <!-- Sidebar (desktop) -->
+  <aside class="hidden bg-panel lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col" aria-label="Sidebar">
+    <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-line px-6">
       <div class="flex h-16 shrink-0 items-center gap-x-3">
-        <span class="flex size-8 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-400 inset-ring inset-ring-indigo-400/30">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-5"><path d="M4 20 20 4M9 4l11 11M4 9l11 11"/></svg>
+        <span class="flex size-8 items-center justify-center rounded-lg bg-accent/15 text-accent-text inset-ring inset-ring-accent/30" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M4 20 20 4M9 4l11 11M4 9l11 11"/></svg>
         </span>
-        <div><p class="text-sm/5 font-semibold text-white">EK Elementalist</p><p class="text-xs/4 text-gray-400">Trade links · Fornaxx → fubgun</p></div>
+        <div class="min-w-0"><h1 class="truncate text-sm/5 font-semibold text-ink">EK Elementalist</h1><p class="truncate text-xs/4 text-ink-3">Fornaxx → fubgun</p></div>
       </div>
-      <nav class="flex flex-1 flex-col">
+      <nav class="flex flex-1 flex-col" aria-label="Gear slots">
         <ul role="list" class="flex flex-1 flex-col gap-y-7">
           <li><ul id="nav-list" role="list" class="-mx-2 space-y-1"></ul></li>
-          <li class="-mx-6 mt-auto border-t border-white/10 px-6 py-4 text-xs/5 text-gray-500">
-            <p>League <span id="hdr-league" class="font-medium text-gray-300"></span></p>
-            <p>Level <span id="hdr-level" class="font-medium text-gray-300"></span> · max <span id="hdr-budget" class="font-medium text-gray-300"></span></p>
+          <li class="-mx-6 mt-auto border-t border-line px-6 py-4 text-xs/5 text-ink-3">
+            <p>League <span id="hdr-league" class="font-medium text-ink-2"></span></p>
+            <p>Level <span id="hdr-level" class="num font-medium text-ink-2"></span> · max <span id="hdr-budget" class="num font-medium text-ink-2"></span></p>
           </li>
         </ul>
       </nav>
     </div>
-  </div>
+  </aside>
 
   <!-- Mobile top bar -->
-  <div class="sticky top-0 z-40 flex items-center gap-x-4 bg-gray-900 px-4 py-3 shadow-sm lg:hidden after:pointer-events-none after:absolute after:inset-0 after:border-b after:border-white/10">
-    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-400 inset-ring inset-ring-indigo-400/30">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-5"><path d="M4 20 20 4M9 4l11 11M4 9l11 11"/></svg>
+  <header class="sticky top-0 z-40 flex items-center gap-x-3 border-b border-line bg-panel/95 px-4 py-2.5 backdrop-blur lg:hidden">
+    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent-text inset-ring inset-ring-accent/30" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5"><path d="M4 20 20 4M9 4l11 11M4 9l11 11"/></svg>
     </span>
     <div class="relative z-10 grid flex-1 grid-cols-1">
-      <select id="nav-select" aria-label="Gear slot" class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/5 py-1.5 pr-8 pl-3 text-sm/6 font-semibold text-white outline-1 -outline-offset-1 outline-white/10 *:bg-gray-800 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-500"></select>
-      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-400"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+      <select id="nav-select" aria-label="Gear slot" class="select min-h-11 text-sm/6 font-semibold"></select>
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-3 size-4 self-center justify-self-end text-ink-3"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
     </div>
     <span id="mob-title" class="sr-only"></span>
-  </div>
+  </header>
 
   <main class="lg:pl-64">
-    <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
 
       <!-- Settings -->
-      <section aria-labelledby="settings-h" class="rounded-lg bg-gray-800/50 outline -outline-offset-1 outline-white/10">
-        <div class="flex flex-wrap items-start justify-between gap-3 px-4 py-4 sm:px-6">
-          <div>
-            <h2 id="settings-h" class="text-base font-semibold text-white">Your character</h2>
-            <p class="mt-1 text-sm text-gray-400">Every link below is built from these. Saved in this browser.</p>
+      <section aria-labelledby="settings-h" class="card">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+          <div class="min-w-0">
+            <h2 id="settings-h" class="text-base font-semibold text-ink">Your character</h2>
+            <p id="settings-sum" class="mt-0.5 text-sm/6 text-ink-3 lg:hidden"></p>
+            <p class="mt-0.5 hidden text-sm/6 text-ink-3 lg:block">Every link below is built from these. Saved in this browser.</p>
           </div>
-          <div class="flex items-center gap-1 rounded-lg bg-white/5 p-1 inset-ring inset-ring-white/10" role="group" aria-label="Phase">
-            <button type="button" data-phase="budget" class="rounded-md px-3 py-1.5 text-sm font-medium text-gray-400 hover:text-white cursor-pointer">Budget · t0ezm0qf</button>
-            <button type="button" data-phase="mirror" class="rounded-md px-3 py-1.5 text-sm font-medium text-gray-400 hover:text-white cursor-pointer">Mirror · 2peil0qa</button>
+          <div class="flex w-full items-center gap-2 sm:w-auto">
+            <div class="flex flex-1 items-center gap-1 rounded-lg bg-white/5 p-1 inset-ring inset-ring-line sm:flex-none" role="group" aria-label="Spec">
+              <button type="button" data-phase="budget" class="seg">Budget</button>
+              <button type="button" data-phase="mirror" class="seg">Mirror</button>
+            </div>
+            <button id="settings-toggle" type="button" class="btn btn-ghost lg:hidden" aria-expanded="false" aria-controls="settings-grid">Edit</button>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-4 border-t border-white/10 px-4 py-4 sm:px-6 md:grid-cols-4 xl:grid-cols-10">
-          <div class="col-span-2 xl:col-span-2">
-            <label for="s-level" class="block text-sm/6 font-medium text-white">Level</label>
-            <div class="mt-2 flex">
-              <button id="s-level-dn" type="button" aria-label="Level down" class="flex shrink-0 items-center rounded-l-md bg-white/5 px-3 text-gray-300 outline-1 -outline-offset-1 outline-white/10 hover:bg-white/10 cursor-pointer">−</button>
-              <input id="s-level" type="number" min="1" max="100" inputmode="numeric" class="-ml-px block w-full grow bg-white/5 px-3 py-1.5 text-center text-2xl font-semibold text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500" />
-              <button id="s-level-up" type="button" aria-label="Level up" class="-ml-px flex shrink-0 items-center rounded-r-md bg-white/5 px-3 text-gray-300 outline-1 -outline-offset-1 outline-white/10 hover:bg-white/10 cursor-pointer">+</button>
+        <div id="settings-grid" class="hidden grid-cols-2 gap-4 px-4 py-4 sm:grid-cols-4 sm:px-6 lg:grid xl:grid-cols-12">
+          <div class="col-span-2 xl:col-span-3">
+            <label for="s-level" class="lbl">Level</label>
+            <div class="mt-1 flex">
+              <button id="s-level-dn" type="button" aria-label="Level down" class="btn btn-secondary min-w-11 rounded-r-none">−</button>
+              <input id="s-level" type="number" min="1" max="100" inputmode="numeric" class="field num -mx-px rounded-none text-center text-xl font-semibold" />
+              <button id="s-level-up" type="button" aria-label="Level up" class="btn btn-secondary min-w-11 rounded-l-none">+</button>
             </div>
           </div>
-          <div class="col-span-2 xl:col-span-2">
-            <label for="s-budget" class="block text-sm/6 font-medium text-white">Max price</label>
-            <div class="mt-2 flex">
-              <input id="s-budget" type="number" min="0" step="1" inputmode="decimal" class="block w-full grow rounded-l-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+          <div class="col-span-2 xl:col-span-3">
+            <label for="s-budget" class="lbl">Max price</label>
+            <div class="mt-1 flex">
+              <input id="s-budget" type="number" min="0" step="1" inputmode="decimal" class="field num rounded-r-none" />
               <div class="-ml-px grid shrink-0 grid-cols-1">
-                <select id="s-unit" aria-label="Currency" class="col-start-1 row-start-1 appearance-none rounded-r-md bg-white/5 py-1.5 pr-8 pl-3 text-base text-gray-300 outline-1 -outline-offset-1 outline-white/10 *:bg-gray-800 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"><option value="div">div</option><option value="c">chaos</option></select>
-                <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-400"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+                <select id="s-unit" aria-label="Currency" class="select rounded-l-none"><option value="div">div</option><option value="c">chaos</option></select>
+                <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-3 size-4 self-center justify-self-end text-ink-3"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
               </div>
             </div>
           </div>
           <div>
-            <label for="s-div" class="block text-sm/6 font-medium text-white">Chaos / div</label>
-            <input id="s-div" type="number" min="1" inputmode="numeric" class="mt-2 block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+            <label for="s-div" class="lbl">Chaos / div</label>
+            <input id="s-div" type="number" min="1" inputmode="numeric" class="field num mt-1" />
           </div>
           <div>
-            <label for="s-league" class="block text-sm/6 font-medium text-white">League</label>
-            <input id="s-league" type="text" class="mt-2 block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+            <label for="s-league" class="lbl">League</label>
+            <input id="s-league" type="text" class="field mt-1" />
           </div>
-          <div>
-            <label for="s-status" class="block text-sm/6 font-medium text-white">Sellers</label>
-            <div class="mt-2 grid grid-cols-1">
-              <select id="s-status" class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/5 py-1.5 pr-8 pl-3 text-base text-white outline-1 -outline-offset-1 outline-white/10 *:bg-gray-800 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"><option value="securable">Buyout only</option><option value="online">Online</option><option value="any">Any</option></select>
-              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-400"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+          <div class="xl:col-span-2">
+            <label for="s-status" class="lbl">Sellers</label>
+            <div class="mt-1 grid grid-cols-1">
+              <select id="s-status" class="select"><option value="securable">Buyout only</option><option value="online">Online</option><option value="any">Any</option></select>
+              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-3 size-4 self-center justify-self-end text-ink-3"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
             </div>
           </div>
           <div>
-            <label for="s-roll" class="block text-sm/6 font-medium text-white">Top roll ≥</label>
-            <div class="mt-2 grid grid-cols-1">
-              <select id="s-roll" class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/5 py-1.5 pr-8 pl-3 text-base text-white outline-1 -outline-offset-1 outline-white/10 *:bg-gray-800 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"><option value="0.7">70%</option><option value="0.85">85%</option><option value="0.95">95%</option><option value="1">Max</option></select>
-              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-400"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+            <label for="s-roll" class="lbl">Top roll ≥</label>
+            <div class="mt-1 grid grid-cols-1">
+              <select id="s-roll" class="select"><option value="0.7">70%</option><option value="0.85">85%</option><option value="0.95">95%</option><option value="1">Max</option></select>
+              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-3 size-4 self-center justify-self-end text-ink-3"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
             </div>
           </div>
           <div>
-            <label for="s-corr" class="block text-sm/6 font-medium text-white">Corrupted</label>
-            <div class="mt-2 grid grid-cols-1">
-              <select id="s-corr" class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/5 py-1.5 pr-8 pl-3 text-base text-white outline-1 -outline-offset-1 outline-white/10 *:bg-gray-800 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"><option value="any">Any</option><option value="no">Exclude</option></select>
-              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end text-gray-400"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+            <label for="s-corr" class="lbl">Corrupted</label>
+            <div class="mt-1 grid grid-cols-1">
+              <select id="s-corr" class="select"><option value="any">Any</option><option value="no">Exclude</option></select>
+              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-3 size-4 self-center justify-self-end text-ink-3"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Loadout at level -->
-      <section aria-label="Loadout at your level" class="mt-6">
-        <h2 id="loadout-h" class="text-sm font-semibold text-gray-300">fubgun budget — the target per slot <span class="font-normal text-gray-500">— click a slot to jump</span></h2>
-        <dl id="loadout" class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"></dl>
+      <!-- Loadout -->
+      <section aria-labelledby="loadout-h" class="mt-6">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="loadout-h" class="text-sm font-semibold text-ink-2"></h2>
+          <p id="loadout-tally" class="meta"></p>
+        </div>
+        <ul id="loadout" role="list" class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"></ul>
       </section>
 
       <!-- Slot -->
-      <section class="mt-8">
-        <div class="mb-4 flex items-baseline justify-between">
-          <h2 id="slot-title" class="text-2xl font-semibold tracking-tight text-white"></h2>
+      <section class="mt-8" aria-labelledby="slot-title">
+        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="slot-title" class="text-2xl font-semibold tracking-tight text-ink"></h2>
+          <p id="slot-sub" class="meta"></p>
         </div>
-        <div id="slot" class="space-y-6"></div>
+        <div id="slot" class="space-y-6 outline-none" tabindex="-1"></div>
       </section>
 
-      <footer class="mt-10 border-t border-white/10 pt-6 text-xs/5 text-gray-500">
-        <p>Spec is fubgun's EK Elementalist: budget PoB <a href="https://maxroll.gg/poe/pob/t0ezm0qf" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">t0ezm0qf</a> and mirror PoB <a href="https://maxroll.gg/poe/pob/2peil0qa" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">2peil0qa</a>; starting point is <a href="https://maxroll.gg/poe/pob/dqeik0qu" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">dqeik0qu</a> (Fornaxx, L96). Weights and hard filters are lifted from his items; where he wrote a crafting route the page gives the fractured-base search, not a pretend finished item. Stat IDs from the official trade stat list; gem numbers and base stats from <a href="https://poedb.tw/us/Modifiers" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">poedb</a> (05/09/2026, 3.29). Every search is capped at your level and price and uses the trade site's Weighted Sum v2 filter.</p>
-        <p class="mt-1">Handy: <a href="https://poe.ninja/poe1/builds/allflame?skills=Ethereal+Knives&class=Elementalist" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">poe.ninja EK Elementalists</a> · <a href="https://poe.ninja/poe1/economy/allflame/currency" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">divine ratio</a> · <a href="https://www.craftofexile.com/" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">Craft of Exile</a> · <a href="https://www.youtube.com/watch?v=gnGP9VI4Nmw" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">waggles · Focused amulet</a> · <a href="https://www.youtube.com/watch?v=R6Lq1D2KhVc" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">FGkorbyn · double-elevated boots</a> · <a href="https://cameronsinclairplp-del.github.io/la-trade-links/" target="_blank" rel="noopener" class="text-gray-400 underline hover:text-white">the Deadeye page</a>. Not affiliated with Grinding Gear Games. Edit <code>data.js</code> to change weights, uniques or bases.</p>
+      <footer class="mt-10 border-t border-line pt-6 text-xs/5 text-ink-3">
+        <p class="max-w-4xl">Spec is fubgun's EK Elementalist: budget PoB <a href="https://maxroll.gg/poe/pob/t0ezm0qf" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">t0ezm0qf</a> and mirror PoB <a href="https://maxroll.gg/poe/pob/2peil0qa" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">2peil0qa</a>; starting point is <a href="https://maxroll.gg/poe/pob/dqeik0qu" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">dqeik0qu</a> (Fornaxx, L96). Weights and hard filters are lifted from his items; where he wrote a crafting route the page gives the fractured-base search, not a pretend finished item. Stat IDs from the official trade stat list; gem numbers and base stats from <a href="https://poedb.tw/us/Modifiers" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">poedb</a> (05/09/2026, 3.29). Every search is capped at your level and price and uses the trade site's Weighted Sum v2 filter.</p>
+        <p class="mt-1 max-w-4xl">Handy: <a href="https://poe.ninja/poe1/builds/allflame?skills=Ethereal+Knives&class=Elementalist" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">poe.ninja EK Elementalists</a> · <a href="https://poe.ninja/poe1/economy/allflame/currency" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">divine ratio</a> · <a href="https://www.craftofexile.com/" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">Craft of Exile</a> · <a href="https://www.youtube.com/watch?v=gnGP9VI4Nmw" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">waggles · Focused amulet</a> · <a href="https://www.youtube.com/watch?v=R6Lq1D2KhVc" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">FGkorbyn · double-elevated boots</a> · <a href="https://cameronsinclairplp-del.github.io/la-trade-links/" target="_blank" rel="noopener" class="text-ink-2 underline decoration-line-strong underline-offset-2 hover:text-ink">the Deadeye page</a>. Not affiliated with Grinding Gear Games. Edit <code class="num">data.js</code> to change weights, uniques or bases.</p>
       </footer>
     </div>
   </main>
 
-  <div id="toast" hidden class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-lg"></div>
+  <div id="toast" hidden role="status" aria-live="polite" class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-md bg-ink px-3 py-2 text-sm font-medium text-canvas shadow-lg"></div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>

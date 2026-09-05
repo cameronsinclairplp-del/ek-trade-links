@@ -1,16 +1,18 @@
 {
-  "name": "la-trade",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "ek-trade-links",
+  "version": "1.1.0",
+  "description": "Trade links for an EK herald-stacking CI Elementalist — fubgun's budget and mirror PoBs as searches",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "css": "tailwindcss -i src.css -o styles.css --minify",
+    "test": "node scripts/test.js",
+    "qa": "node scripts/qa.mjs && node scripts/interact.mjs",
+    "check": "npm test && npm run qa"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.3",
+    "axe-core": "^4.10.0",
     "playwright": "^1.62.1",
     "tailwindcss": "^4.3.3"
   }
