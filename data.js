@@ -1,6 +1,6 @@
 // EK Elementalist Trade Links — all editable content lives here.
 // Spec = fubgun's two PoBs: budget t0ezm0qf (phase "budget") and mirror 2peil0qa (phase "mirror"). Item-by-item dump in reference/pob-items.md.
-// Cameron's PoB: ipgiz0qx (05/09/2026, L97) — same items as dqeik0qu; config, Bastion of Elements and jewel socket 59585 done since.
+// Cameron's PoB: glis80qp (05/09/2026 22:45, L97) — same items as dqeik0qu; since then: config, flasks ticked, Bastion of Elements, socket 59585, 17 Arohongui tattoos. Supreme Ostentation (Elegant Hubris) = no attribute requirements.
 // Stat IDs from the official trade stat list (awakened-poe-trade mirror of stats.ndjson) 05/09/2026; the ones marked "live" were also run on pathofexile.com/trade the same day.
 // Gem numbers from poedb.tw 05/09/2026 (3.29). Base levels from poedb.
 // "avg" = trade site uses the average of "X to Y" for weighting.
@@ -9,7 +9,7 @@ const DATA = {
   league: "Allflame",
   divineChaos: 425, // poe.ninja Allflame 05/09/2026 (was 220 two days earlier — end-of-league drift). Editable in the UI, saved locally
   character: "Fornaxx",
-  pob: { now: "ipgiz0qx", budget: "t0ezm0qf", mirror: "2peil0qa" },
+  pob: { now: "glis80qp", budget: "t0ezm0qf", mirror: "2peil0qa" },
 
   // ---- stat ids ---------------------------------------------------------------
   S: {
@@ -174,7 +174,7 @@ const DATA = {
 
   // ---- gems (poedb 05/09/2026) --------------------------------------------------
   // qWorth / l21 / q23: "yes" = buy it, "minor" = only if rich, "no" = money down the drain.
-  // have: what Cameron's PoB shows he already has (ipgiz0qx, 05/09/2026 — unchanged from dqeik0qu).
+  // have: what Cameron's PoB shows he already has (glis80qp, 05/09/2026 — unchanged from dqeik0qu).
   gems: [
     { name: "Ethereal Knives", group: "Main link", req20: 70, have: "21/20",
       q: "(0–20)% more Projectile Speed", qWorth: "yes", qWhy: "20% more projectile speed = range and return timing with Nimis; main skill, it's cheap",
@@ -290,7 +290,7 @@ const DATA = {
         { piece: "Boots · 4L", note: "all four linked on the mirror boots", gems: ["Frostblink of Wintry Blast", "Faster Casting Support", "Spell Echo Support", "Frostblink"] },
         { piece: "Granted", note: "", gems: ["Primal Aegis", "Herald of the Hive"] },
       ] },
-    { key: "now", label: "Yours now (ipgiz0qx)", who: "mirror image of fubgun's layout: EK in the staff, heralds in the chest — same gems, so only the chest's +1 dex lands on Herald of Ice / Haste instead of Pinpoint. Not worth re-socketing.",
+    { key: "now", label: "Yours now (glis80qp)", who: "mirror image of fubgun's layout: EK in the staff, heralds in the chest — same gems, so only the chest's +1 dex lands on Herald of Ice / Haste instead of Pinpoint. Not worth re-socketing.",
       pieces: [
         { piece: "Staff · 6L", note: "your EK link — all four exceptional supports already at level 4", gems: ["Ethereal Knives", "Pinpoint Support", "Overloaded Intensity Support", "Greater Spell Echo Support", "Invert the Rules Support", "Inspiration Support"] },
         { piece: "Body Armour · 6L", note: "", gems: ["Herald of Ash", "Herald of Purity", "Herald of Ice", "Haste", "Eclipse Support", "Enlighten Support"] },
@@ -303,7 +303,7 @@ const DATA = {
 
   // ---- setup checklist (free upgrades) -------------------------------------------
   setup: {
-    configDone: "Done 05/09 — your PoB ipgiz0qx carries every line below. Still to do in PoB: Items tab → tick all five flasks (fubgun's PoB has them active; yours has none, which is why it shows 0 armour and 22% attack block).",
+    configDone: "Done 05/09 — glis80qp carries every line below and all five flasks are ticked. Remember the config also assumes Tailwind, Elusive, Onslaught and Unnerve you don't own yet.",
     config: [
       "Charges: Power, Frenzy, Endurance all on",
       "Enemy: Shocked (effect 50), Ignited, Chilled, Unnerved; 'Shocked an enemy recently'; budget PoB also has 'Frozen an enemy recently'",
@@ -314,49 +314,48 @@ const DATA = {
       "Nearby enemies = 1 · Enemy is a Boss",
       "Pantheon: Lunaris + Yugul",
     ],
-    ascendancy: "Shaper of Flames → Bastion of Elements (Primal Aegis). Done 05/09 — allocated in ipgiz0qx. Everything else on your ascendancy already matched.",
+    ascendancy: "Shaper of Flames → Bastion of Elements (Primal Aegis). Done 05/09 — allocated in ipgiz0qx / glis80qp. Everything else on your ascendancy already matched.",
     tree: [
       "Done: jewel socket 59585 allocated at level 97 (empty — Path stage 1 fills it).",
-      "Dark Arts: dead on a staff (every line is 'while Dual Wielding'). Regret it. It's an Impossible Escape pick; nothing paths through it.",
-      "fubgun has, you don't: Deep Wisdom (+20 ES / +20 mana / +20 Int, adjacent to an Intelligence node you own), small jewel socket 9797 (inside one of your medium clusters), Steeped in the Profane and Tolerance (both in Pain Attunement's radius via Impossible Escape).",
+      "Dark Arts: sits in your Elegant Hubris (seed 30180) radius, so the jewel replaces it with a damage notable — keep it. (Without the jewel it would be dead: every line is 'while Dual Wielding'.)",
+      "fubgun has, you don't: Deep Wisdom (+20 ES / +20 mana / +20 Int, adjacent to an Intelligence node you own), small jewel socket 9797 (inside one of your medium clusters), Steeped in the Profane and Tolerance (both in Pain Attunement's radius via Impossible Escape). Your PoB shows 3 unspent points (120/123).",
       "Masteries: identical. The Minion Defence mastery node carries the Runegraft of the Fortress in both trees.",
       "Your Runegraft of Treachery sits on an unallocated node (12125) and does nothing. Leave it: 'auras also affect enemies' would give monsters your Haste.",
       "Cluster jewels: your three larges and four mediums match fubgun's budget set socket for socket (2× spell, 1× elemental; 1× herald, 1× Repeater, 2× Aerodynamics).",
       "Verified 05/09 against the 3.29 tree data (node ids), not read off a screenshot.",
     ],
     tattoos: [
-      "fubgun's budget tree runs 17 active Tattoos of the Arohongui Shaman (each replaces a small Intelligence node with '5% increased Effect of Herald Buffs on you') = +85% herald effect. You have none. Bulk exchange: 1–10c each offline, 50c–1 div online (05/09).",
+      "Done 05/09 (glis80qp): 17 Tattoos of the Arohongui Shaman on your Intelligence nodes — the same 17 fubgun runs ('5% increased Effect of Herald Buffs on you' each, +85%). DPS on the sheet went 26.0M → 37.2M.",
+      "Attribute requirements don't exist for you: Elegant Hubris (seed 30180) gives Supreme Ostentation. Int 52 is fine. That also means the last five untattooed Intelligence nodes (37671, 32210, 8948, 48778, 21678) can take a tattoo each — +25% more herald effect for 1–10c apiece; all you give up is 2% ES per 10 Int.",
       "You already match his 5 Tattoos of the Valako Shieldbearer (+1% attack block each, on the Strength nodes) and the Runegraft of the Fortress (40% increased Defences, −10% attributes).",
-      "Each Arohongui tattoo removes 10 Int (9 after the Runegraft). Gem floors (poedb, level 20): Herald of Thunder 155 Int, Spell Echo 111, Faster Casting 111. You have 210 → 5 tattoos now, 7 with Deep Wisdom, more with a +Int jewel. fubgun's PoB shows 30 Int — the game would grey his gems out; PoB doesn't check.",
-      "Dex: PoB says 108. Haste needs 155 Dex at level 20. Hover Haste in game — if the requirement is red, Sublime Vision is doing nothing.",
       "His 6 Ramako Sniper and 5 Hinekora Warrior tattoos sit on nodes he doesn't allocate — ignore them.",
     ],
   },
 
   // ---- the Path: sequenced, item by item, with the reasons ----------------------
-  // Facts: your PoB ipgiz0qx vs fubgun's t0ezm0qf / 2peil0qa (decoded 05/09/2026), tree data 3.29, live trade 05/09/2026, poedb, fubgun's notes.
+  // Facts: your PoB glis80qp (and ipgiz0qx before it) vs fubgun's t0ezm0qf / 2peil0qa (decoded 05/09/2026), tree data 3.29, live trade 05/09/2026, poedb, fubgun's notes.
   // step.pob: "done" = seen in your PoB; "partial" = some of it is. state.done[id] is the checkbox.
   path: {
     updated: "05/09/2026",
-    pobNow: "ipgiz0qx",
+    pobNow: "glis80qp",
     intro: "One list, in order. Each step says what to buy or do, why it works on this build, how, what it costs you elsewhere (resists, attributes, immunity), and what 'done' looks like. Tick them off as you go — the tick is saved in this browser.",
     numbers: {
-      cols: ["You · ipgiz0qx", "fubgun budget", "fubgun mirror"],
+      cols: ["You · glis80qp", "fubgun budget", "fubgun mirror"],
       rows: [
         ["Level", "97", "99", "100"],
-        ["DPS (PoB, full config)", "26.0M", "79.8M", "117M"],
+        ["DPS (PoB, full config)", "37.3M", "79.8M", "117M"],
         ["Energy shield", "4,738", "9,017", "9,298"],
-        ["Effective HP", "81k", "238k", "253k"],
-        ["Max physical hit", "6,120", "14,312", "14,727"],
-        ["Max fire / cold / lightning hit", "24k / 32k / 33k", "58k / 73k / 60k", "59k / 74k / 62k"],
-        ["Attack block / spell block", "22% / 70%", "69% / 75%", "75% / 75%"],
-        ["Armour", "0", "4,560", "4,575"],
-        ["Res over cap: fire / cold / light", "+13 / +24 / +41", "+45 / +44 / +19", "+71 / +63 / +11"],
+        ["Effective HP", "108k", "238k", "253k"],
+        ["Max physical hit", "7,715", "14,312", "14,727"],
+        ["Max fire / cold / lightning hit", "27k / 45k / 37k", "58k / 73k / 60k", "59k / 74k / 62k"],
+        ["Attack block / spell block", "30% / 75%", "69% / 75%", "75% / 75%"],
+        ["Armour", "3,555", "4,560", "4,575"],
+        ["Res over cap: fire / cold / light", "+13 / +59 / +41", "+45 / +44 / +19", "+71 / +63 / +11"],
         ["Crit chance / multi", "97% / 505%", "81% / 591%", "90% / 622%"],
-        ["Movement speed", "+111%", "+182%", "+182%"],
+        ["Movement speed", "+143%", "+182%", "+182%"],
         ["Mana unreserved", "88", "98", "99"],
       ],
-      note: "Your column is your PoB as uploaded: none of the five flasks are ticked (that's the 0 armour and most of the block gap), and the config assumes Tailwind, Elusive, Onslaught and Unnerve — mods that come from boots and gloves you don't own yet. fubgun's columns have all five flasks active.",
+      note: "All three columns are PoB with fubgun's config and all five flasks active. Yours still assumes Tailwind, Elusive, Onslaught and Unnerve — mods that come from the boots and gloves you don't own yet; untick them for today's honest number. The 26M → 37M jump on 05/09 is the 17 tattoos.",
     },
     how: {
       damage: [
@@ -379,41 +378,35 @@ const DATA = {
     },
     stages: [
       {
-        key: "s0", title: "Stage 0 · Free, this session", cost: "regret orbs + a few div of tattoos",
-        blurb: "Nothing here needs a divine. One is done, two are half done, and the tattoos are the biggest DPS-per-chaos item on the whole page.",
+        key: "s0", title: "Stage 0 · Free", cost: "3 unspent points + a few chaos",
+        blurb: "Nothing here needs a divine. Config, ascendancy and the 17 tattoos are done (glis80qp, 05/09); the tree points and the last five tattoos are what's left.",
         steps: [
-          { id: "config", title: "PoB: config matched, flasks still to tick", cost: "free", pob: "partial", slot: "setup",
-            what: "Your config matches fubgun's as of 05/09 — charges, ailments, intensity, Hive pressure, boss, pantheon. Still to do: Items tab → tick all five flasks.",
-            why: "PoB only counts a conditional mod when you tell it the condition holds. Empty config: 2.7M DPS, 21.7k EHP. fubgun's config: 26.0M, 81k. Same character. Flasks are the same idea: PoB shows you at 0 armour and 22% attack block because Rumi's isn't ticked; fubgun's PoB has all five active.",
-            how: ["Items tab → the small checkbox on each flask → all five on.", "In Config, untick Tailwind, Elusive, Onslaught and 'Enemy is Unnerved' when you want today's honest number. Those four come from the boots and gloves in Stage 1."],
+          { id: "config", title: "PoB: config matched, flasks ticked", cost: "free", pob: "done", slot: "setup",
+            what: "Your config matches fubgun's and all five flasks are active (glis80qp). Done.",
+            why: "PoB only counts a conditional mod when you tell it the condition holds. Empty config: 2.7M DPS, 21.7k EHP. fubgun's config: 26.0M, 81k. Same character. Flasks are the same idea: ticking Rumi's took you from 0 armour / 22% block to 3,555 / 30%.",
+            how: ["In Config, untick Tailwind, Elusive, Onslaught and 'Enemy is Unnerved' when you want today's honest number. Those four come from the boots and gloves in Stage 1."],
             learn: ["Config = the assumptions. A comparison between two PoBs is only as good as their configs matching.", "The numbers table above is PoB-with-config on both sides; it is not a measurement of the game."],
-            check: "Calcs → Defence shows armour above 0 and attack block above 22 with the flasks on." },
+            check: "Done — seen in glis80qp." },
           { id: "asc", title: "Ascendancy: Bastion of Elements", cost: "done", pob: "done", slot: "setup",
             what: "Shaper of Flames is gone, Bastion of Elements is allocated, Primal Aegis is in your skill list. Done.",
             why: "Bastion of Elements: a level-20 Primal Aegis that can take 75 elemental damage per allocated notable (clusters count), recharging between hits; other aegis skills disabled; no reflected elemental damage. Shaper of Flames was 'hits always ignite' — ignite is 73k of your 26M.",
             learn: ["Ascendancy points move with regret orbs at the tree, no lab.", "Every notable you add — tree, cluster, ascendancy — makes the aegis 75 bigger."],
-            check: "Done — seen in ipgiz0qx." },
-          { id: "tree", title: "Tree: regret Dark Arts, take Deep Wisdom, socket 9797, Steeped in the Profane, Tolerance", cost: "1 regret + levels 98–99", pob: "partial", slot: "setup",
-            what: "You took the empty jewel socket 59585 at level 97 — that is one of the two sockets fubgun uses for the Forbidden pair. Left: Dark Arts is dead (every line says 'while Dual Wielding'; you hold a staff). Regret it and spend that point plus levels 98 and 99 on Deep Wisdom (+20 ES, +20 mana, +20 Intelligence — one step from an Intelligence node you already have), the second small jewel socket 9797 (inside one of your medium clusters), Steeped in the Profane (15% reduced curse effect on you) and Tolerance (30% chance to avoid bleeding; its chaos-res and poison lines do nothing on CI).",
-            why: "After that, the only difference between your tree and fubgun's budget tree is cluster-jewel notables — and your clusters already match his socket for socket. Deep Wisdom's +20 Int is also tattoo budget (next step).",
-            how: ["Regret Dark Arts. Nothing paths through it: it's an Impossible Escape pick (Pain Attunement's radius), like Steeped in the Profane and Tolerance.", "Deep Wisdom first, then 9797 when you have a jewel for it (Stage 1, Immutable Force), then Steeped, then Tolerance."],
-            learn: ["Impossible Escape (Pain Attunement): any passive inside the keystone's radius can be allocated with no path to it.", "Masteries: yours already match fubgun's. The Minion Defence mastery node carries the Runegraft of the Fortress in both trees (40% increased Defences, −10% attributes) — a Runegraft replaces the mastery."],
+            check: "Done — seen in glis80qp." },
+          { id: "tree", title: "Tree: spend the 3 unspent points — Deep Wisdom, socket 9797, Steeped in the Profane (Tolerance at 98)", cost: "3 points you already have", pob: "partial", slot: "setup",
+            what: "You took the empty jewel socket 59585 at level 97 — one of the two sockets fubgun uses for the Forbidden pair — and PoB shows 3 points unspent (120/123). Put them into Deep Wisdom (+20 ES, +20 mana, +20 Int; one step from an Intelligence node you already have), the second small jewel socket 9797 (inside one of your medium clusters), and Steeped in the Profane (15% reduced curse effect on you). Tolerance (30% chance to avoid bleeding; its chaos-res and poison lines do nothing on CI) at level 98.",
+            why: "After that, the only difference between your tree and fubgun's budget tree is cluster-jewel notables — and your clusters already match his socket for socket. Dark Arts stays: it sits in your Elegant Hubris radius and the jewel turns it into a damage notable (without the jewel it would be dead — every line is 'while Dual Wielding').",
+            how: ["Deep Wisdom first, then 9797 (fill it with Immutable Force or a block jewel, Stage 1), then Steeped in the Profane — both Steeped and Tolerance are Impossible Escape picks (Pain Attunement's radius), no pathing needed."],
+            learn: ["Impossible Escape (Pain Attunement): any passive inside the keystone's radius can be allocated with no path to it.", "Timeless jewels (your Elegant Hubris) rewrite the notables in their radius by seed — a node's tooltip in PoB shows what it became, so never judge a notable inside the circle by its normal name.", "Masteries: yours already match fubgun's. The Minion Defence mastery node carries the Runegraft of the Fortress in both trees (40% increased Defences, −10% attributes) — a Runegraft replaces the mastery."],
             watch: ["Your PoB has a Runegraft of Treachery sitting on an unallocated node (12125). It does nothing there. Don't allocate it: 'Auras also affect Enemies' would hand monsters your Haste."],
-            check: "PoB tree compare against t0ezm0qf shows only cluster-jewel nodes." },
-          { id: "tattoo", title: "Tattoos: Tattoo of the Arohongui Shaman on your Intelligence nodes", cost: "5–50c each · 17 = 1–8 div", slot: "setup",
-            what: "fubgun's hidden edge. His tree has 17 active Arohongui Shaman tattoos — each replaces a small Intelligence node with '5% increased Effect of Herald Buffs on you': +85% herald effect. Your tree has the same Intelligence nodes with none tattooed. You already run the 5 Valako Shieldbearer tattoos (+1% attack block each) and the Runegraft of the Fortress — that part matches.",
-            why: "The whole build is herald effect (see 'How the build works'). Each 5% multiplies Purity's more-physical, Ash's extra fire, Ice's and Thunder's flat damage, on every knife. Probably the biggest DPS per chaos on this page, and the previous version of this page missed it.",
-            how: ["Bulk exchange link below. 05/09: 1–10c each from sellers who were offline (one had 19 in stock at 5c), 50c–1 div from the five online. Buy in batches; whisper the offline ones when they show up.", "Apply: use the tattoo on an allocated small Intelligence node (+10 Int). It replaces the node's stat. Treat it as permanent (the only way to change one is another tattoo), so tattoo nodes you'll keep."],
-            watch: ["Each tattoo deletes 10 Intelligence (9 after the Runegraft's −10%). Your gems need it: Herald of Thunder 155 Int, Spell Echo 111, Faster Casting 111 at level 20 (poedb; a little more at 21). You have 210. That is 5 tattoos before Herald of Thunder greys out; 7 with Deep Wisdom; 8–9 with the +15 Int block jewel in Stage 1.", "fubgun's PoB sits at 30 Int with those gems socketed. PoB doesn't stop you — the game does: an unmet requirement turns the gem off. Hover every gem after each batch; the requirement line goes red."],
-            learn: ["'Increased' adds up with other 'increased' of the same thing; 'more' multiplies. Tattoos are 'increased herald effect', stacking with Bringer of Ruin's 66% and Discord Artisan's 20%; Farewell to Flesh's 'more' multiplies the total."],
-            check: "Every Intelligence node you keep is tattooed, Int is still above 155 (with margin), every gem tooltip is white.",
+            check: "0 unspent points; PoB tree compare against t0ezm0qf shows only cluster-jewel nodes." },
+          { id: "tattoo", title: "Tattoos: 17 Arohongui Shaman done — the last 5 Intelligence nodes are free herald effect", cost: "5–50c each", pob: "partial", slot: "setup",
+            what: "Done 05/09: the same 17 Arohongui Shaman tattoos fubgun runs — each replaced a small Intelligence node with '5% increased Effect of Herald Buffs on you', +85% total, and the sheet went 26.0M → 37.2M. Five Intelligence nodes are still plain (37671, 32210, 8948, 48778, 21678): another 5% each.",
+            why: "The whole build is herald effect (see 'How the build works'). Each 5% multiplies Purity's more-physical, Ash's extra fire, Ice's and Thunder's flat damage, on every knife. And because Elegant Hubris gives you Supreme Ostentation — no attribute requirements — there's no Int floor to protect: a plain +10 Int node is worth 2% ES and nothing else.",
+            how: ["Bulk exchange link below. 05/09: 1–10c each from sellers who were offline, 50c–1 div from the ones online.", "Apply: use the tattoo on the allocated Intelligence node. Treat it as permanent (the only way to change one is another tattoo)."],
+            learn: ["'Increased' adds up with other 'increased' of the same thing; 'more' multiplies. Tattoos are 'increased herald effect', stacking with Bringer of Ruin's 66% and Discord Artisan's 20%; Farewell to Flesh's 'more' multiplies the total.", "Supreme Ostentation (your Elegant Hubris keystone): no attribute requirements on gems or gear. It's why Int 52 works, and why the amulet and chest swaps later never need to carry attributes."],
+            check: "22 tattooed Intelligence nodes; Int is whatever's left and it doesn't matter.",
             links: [{ label: "Bulk exchange: Arohongui Shaman for chaos", exchange: { have: "chaos", want: "tattoo-of-the-arohongui-shaman" } }, { label: "Same, paid in divines", exchange: { have: "divine", want: "tattoo-of-the-arohongui-shaman" } }] },
-          { id: "dex", title: "Check now: is Haste actually running?", cost: "free", slot: "gems",
-            what: "PoB says you have 108 Dexterity. Haste needs 155 Dex at level 20 (poedb), about 159 at 21. Either you have Dex PoB can't see, or Haste is greyed out in game and Sublime Vision is doing nothing.",
-            why: "If it's off you're missing 25% attack and cast speed and 16% movement speed under a 40% aura-effect jewel, plus the 10% action speed. fubgun's PoB has the same problem at 95 Dex — his sheet ignores requirements too.",
-            how: ["Hover the Haste gem in game. White requirement = fine, ignore this step. Red = you need about 50 Dex: Nimis rolls up to +50 (yours is 32), a jewel suffix, or the Dexterity nodes near your path."],
-            learn: ["Gem attribute requirements are real and PoB won't warn you loudly. Your Dex comes from Headhunter (+57), Nimis (+32) and the Citrine's implicit (+17) — the amulet swap in Stage 2 takes 17 of it away."],
-            check: "Haste's buff icon is up in game and the gem text is white." },
+
         ],
       },
       {
@@ -437,7 +430,7 @@ const DATA = {
             check: "PoB Calcs → Defence still shows 100% chance to avoid elemental ailments.",
             links: [{ label: "Avoid shock + 2H spell damage", link: { extra: ["jewel", 0] } }, { label: "Weighted abyss search", tab: "jewel" }] },
           { id: "block1", title: "Rare block jewel #1 → the empty socket 59585", cost: "2 div", slot: "jewel",
-            what: "+2–3% chance to block attack damage while wielding a staff, plus two of: crit multi, spell crit multi, % maximum ES. 274 listed at 2 div on 05/09 — one of them has +15 Intelligence (tattoo budget).",
+            what: "+2–3% chance to block attack damage while wielding a staff, plus two of: crit multi, spell crit multi, % maximum ES. 274 listed at 2 div on 05/09.",
             why: "Attack block is your biggest defensive gap: 22% vs fubgun's 69%. A block is a hit that does nothing. The staff's 20% and Rumi's 12% come in later steps; this is 3% now, into a socket you already paid for.",
             how: ["Buy. Socket it in 59585 — it's empty."],
             learn: ["Attack block and spell block are separate stats, each capped at 75%. Your staff's implicit is spell block; the suffix fubgun fractures is attack block."],
@@ -454,7 +447,7 @@ const DATA = {
             what: "Level 21 Herald of Purity, Herald of Ice, Herald of Thunder. You have Ash and Haste at 21 already.",
             why: "Purity 21: the buff goes 12% → 13% more physical damage — a 'more' step on every knife. Ice and Thunder 21 add flat cold and lightning. All of it is multiplied by your herald effect, which is why level matters more here than on most builds.",
             how: ["Gems tab links. 21 means corrupted: you can't quality it afterwards, so buy the 21/20 or the 21/0 as listed. Level 21 gems need character level 72."],
-            watch: ["Herald of Thunder 21 needs about 159 Intelligence (155 at 20). Count it into the tattoo plan.", "Reservation doesn't change with gem level — the heralds still fit."],
+            watch: ["Reservation doesn't change with gem level — the heralds still fit. Attribute requirements don't apply to you (Supreme Ostentation)."],
             learn: ["Level 21 and 23% quality only come from corrupting (Vaal Orb): the gem can't be changed again after."],
             check: "Three 21s socketed, mana unreserved still ≥ 0.",
             links: [{ label: "Gems tab", tab: "gems" }] },
@@ -512,17 +505,17 @@ const DATA = {
             what: "Twilight Regalia with fractured 57% Global Defences, 126% ES, +115 ES, 48% fire, 48% cold, +1 socketed dex gems; implicits 33% golem buff effect and 12% physical taken as chaos. 05/09: 80 div buys a finished 117% / 54% defences / +74 ES chest.",
             why: "Global Defences multiplies your whole ES pool, additively with Staff Mastery's 30% and the Runegraft's 40%. '12% of physical damage taken as chaos' on CI is 12% of every physical hit deleted; yours takes 11% as cold, which your cold res then cuts, so most of that slice still lands. 33% golem buff effect makes all four golem buffs bigger.",
             how: ["Buy finished if the 80-div one is still listed; otherwise the fractured base plus fubgun's chest route (Setup tab)."],
-            watch: ["Your chest gives +24 Str/Int (crafted) and 19% cold. Losing 24 Int costs a tattoo or two unless Deep Wisdom or a jewel covers it. Cold: the target chest's 48% more than covers it.", "Losing 'Flasks gain 2 charges every 3 seconds' on the implicit."],
+            watch: ["Your chest gives 19% cold: the target chest's 48% more than covers it. Its +24 Str/Int doesn't matter (Supreme Ostentation).", "Losing 'Flasks gain 2 charges every 3 seconds' on the implicit."],
             learn: ["Fracturing: a Fracturing Orb locks one random mod (1 in N); fubgun's route fractures an ES mod, or recombines two 2-prefix chests. Eldritch implicits go on last."],
-            check: "ES up by a third or more; fire/cold ≥ 75; Int still above your gem floor.",
+            check: "ES up by a third or more; fire/cold ≥ 75.",
             links: [{ label: "Fractured 57% defences base", link: { extra: ["body", 0] } }, { label: "Weighted search", tab: "body" }] },
           { id: "amulet", title: "Focused Amulet — +2 all gems / +2 physical gems / +90% multi", cost: "35 div base · 190 div finished", slot: "amulet",
             what: "Focused Amulet (100% increased explicit magnitudes, one prefix, one suffix) with +2 all skill gems and +90% global crit multi, +2 physical gems, Disciple of the Slaughter anointed. Your Citrine: +1 gems, +36% multi.",
             why: "Biggest single DPS item on the page: gem levels on every skill and every herald, and 90% multi in one slot.",
             how: ["waggles' video (footer) for the craft; the Amulet tab has the +2 base search and the blank-base search.", "Anoint Disciple of the Slaughter with oils after."],
-            watch: ["The cheap '+2 gems' listings carry Foulborn negatives (−96% multi, −2 physical gems). Read every line.", "The Citrine's +17 Str/Dex goes: PoB Dex 108 → 91. Ethereal Knives needs 98 Dex at level 20 (poedb), Haste 155. Find Dex first — Nimis rolls to +50, a jewel suffix, the tree — or the amulet turns your main skill off.", "Also gone: 46% cold res and 49 flat ES. Cold is fine once the chest is in."],
+            watch: ["The cheap '+2 gems' listings carry Foulborn negatives (−96% multi, −2 physical gems). Read every line.", "Gone with the Citrine: 46% cold res and 49 flat ES. Cold is fine once the chest is in. Its +17 Str/Dex doesn't matter (Supreme Ostentation)."],
             learn: ["Anoint: oils at Cassia allocate one notable without a tree point.", "Foulborn mods are negative lines added by 3.29 crafting; they're the 'why is this so cheap'."],
-            check: "Dex ≥ every green gem's requirement, cold ≥ 75, DPS up by the biggest step on the list.",
+            check: "Cold ≥ 75, DPS up by the biggest step on the list.",
             links: [{ label: "+2 all gems on the base", link: { extra: ["amulet", 0] } }, { label: "Blank Focused base", link: { extra: ["amulet", 1] } }, { label: "Weighted search", tab: "amulet" }] },
           { id: "forbidden", title: "Forbidden Flame, then Forbidden Flesh — Vile Bastion", cost: "85 div + 290 div", slot: "jewel",
             what: "The matching pair with Vile Bastion (Occultist): ES regen per enemy killed recently and stun immunity while you have ES. Flame first (85 div), Flesh when the 290 is spare.",
@@ -591,6 +584,8 @@ const DATA = {
       ["Cluster jewel", "Large (outer sockets, 8 passives, 2 sockets), medium (4–5 passives, 1 socket), small. The 'added small passives grant' line is the type; the notables are the names."],
       ["Tattoo / Runegraft", "Consumables that replace a small attribute passive (tattoo) or a mastery (Runegraft) with another effect. fubgun: 17 Arohongui (herald effect), 5 Valako (block), Runegraft of the Fortress."],
       ["Impossible Escape", "Passives inside the named keystone's radius (yours: Pain Attunement) can be allocated with no path."],
+      ["Timeless jewel / Supreme Ostentation", "Elegant Hubris rewrites every notable in its radius by seed and grants a keystone; yours (30180, Caspiro) gives Supreme Ostentation — no attribute requirements — and turns Dark Arts into a damage notable."],
+      ["PoB weights", "Path of Building's Trader scores each trade mod by what it does for your character (DPS and effective hit pool). Paste its Find-best link on a slot card and every search for that slot uses those numbers under fubgun's locks."],
       ["Weighted Sum", "The trade site's search that scores listings by your weights instead of hard filters. Click 'Sum:' on a result to sort best-first."],
     ],
   },
@@ -599,20 +594,20 @@ const DATA = {
   shopTitle: "~100 div today, then the long-run targets",
   shopNote: "Prices are the cheapest instant-buyout listing on 05/09/2026 at 425c/div. Links open at your current price cap — raise it for anything above it. Block A is what I'd buy this week; B is the next 300 div; C is the mirror-tier tax, kept on the page so it's one place. The Path tab is the same list in buying order, with the reasons and the traps.",
   shop: [
-    { n: 1, group: "A · Today — 55–115 div all in", item: "PoB config + Bastion of Elements (done 05/09) — now tick the five flasks in PoB", price: "free", why: "Config and ascendancy are in ipgiz0qx. Your flasks aren't ticked, so PoB shows 0 armour and 22% attack block. Items tab, five checkboxes. Then the honest number: untick Tailwind / Elusive / Onslaught / Unnerved until the boots and gloves exist.", link: { tab: "path", label: "Path tab" }, done: true },
-    { n: 2, group: "A · Today — 55–115 div all in", item: "Tattoo of the Arohongui Shaman × 5 now, up to 17 as your Int allows", price: "5–50c each", why: "fubgun's tree carries 17 of them: +5% increased Effect of Herald Buffs each, +85% total. You have none. Each one deletes 10 Int; Herald of Thunder needs 155, so five now, more with Deep Wisdom and a +Int jewel. Bulk exchange link.", link: { exchange: { have: "chaos", want: "tattoo-of-the-arohongui-shaman" } } },
+    { n: 1, group: "A · Today — 55–115 div all in", item: "PoB config, flasks ticked, Bastion of Elements — done 05/09", price: "free", why: "All in glis80qp. For the honest number untick Tailwind / Elusive / Onslaught / Unnerved until the boots and gloves exist.", link: { tab: "path", label: "Path tab" }, done: true },
+    { n: 2, group: "A · Today — 55–115 div all in", item: "Tattoo of the Arohongui Shaman — 17 done, the last 5 Intelligence nodes optional", price: "5–50c each", why: "fubgun's 17 are in (05/09): +85% herald effect, 26M → 37M on the sheet. Supreme Ostentation means no attribute floor, so the five untattooed Intelligence nodes can take one each for another +25%. Bulk exchange link.", link: { exchange: { have: "chaos", want: "tattoo-of-the-arohongui-shaman" } }, done: true },
     { n: 3, group: "A · Today — 55–115 div all in", item: "Lich's Circlet — 100%+ ES, 35%+ fire res (8%+ reservation implicit if you can)", price: "15c–1 div", why: "Lich's base is 117–134 ES vs your Mind Cage's 73–84, and the ES mastery doubles the helmet. The fire-res filter is there because your Mind Cage carries 50% fire and you're only 13 over cap. 15c on 05/09; 200c–1 div with the reservation implicit.", link: { extra: ["helmet", 3] } },
     { n: 4, group: "A · Today — 55–115 div all in", item: "Hypnotic Eye — 50% avoid shock + spell damage while two-handed", price: "4–15 div", why: "Both of your old abyss jewels carry '50% chance to Avoid being Shocked' — with Stormshroud that's your 100% ailment immunity. The 5c Hypnotic Eyes lack the line; the ones with it are 4 div (2H lightning) to 14 div (2H chaos). Replace Enthralling Stare first; keep Whispering Sphere until the gloves give you a second socket.", link: { extra: ["jewel", 0] } },
     { n: 5, group: "A · Today — 55–115 div all in", item: "Rare block jewel — staff block + two of multi / spell multi / 7% max ES", price: "2 div", why: "Attack block: you 22%, fubgun 69%. Into your empty socket 59585 today. A second one replaces Whispering Sphere only after the gloves' abyssal socket holds Eye #2. 274 listed at 2 div — one has +15 Int.", link: { extra: ["jewel", 2] } },
     { n: 6, group: "A · Today — 55–115 div all in", item: "Rumi's Concoction — 12% attack block roll", price: "40c", why: "Yours is the bottom 8% roll. 4% more block on every hit for 40c.", link: { unique: "Rumi's Concoction", slot: "flask" } },
-    { n: 7, group: "A · Today — 55–115 div all in", item: "Herald 21s: Purity, Ice, Thunder", price: "100c + 34c + 16c", why: "Purity 21 is a 'more physical' step (12 → 13%), Ice and Thunder 21 add flat. Gems tab has the links. Thunder 21 needs ~159 Int — count it into the tattoo plan.", link: { tab: "gems", label: "Gems tab" } },
+    { n: 7, group: "A · Today — 55–115 div all in", item: "Herald 21s: Purity, Ice, Thunder", price: "100c + 34c + 16c", why: "Purity 21 is a 'more physical' step (12 → 13%), Ice and Thunder 21 add flat. Gems tab has the links. No attribute worries — Supreme Ostentation.", link: { tab: "gems", label: "Gems tab" } },
     { n: 8, group: "A · Today — 55–115 div all in", item: "Warlock Gloves — chilled 40%+, abyssal socket, ES 70%+, cold res 30%+", price: "20 div", why: "Abyssal socket for Eye #2, 46% vs chilled, 73% ES, 46% cold and 41% lightning res on the 20-div listing. Buy before the boots: their 46% cold replaces the cold your Slippers carry. The conversion unveil and herald craft are the remaining 20%, done later on the bench.", link: { extra: ["gloves", 3] } },
     { n: 9, group: "A · Today — 55–115 div all in", item: "Warlock Boots — Tailwind on crit + Elusive on crit + Onslaught on kill, 25%+ MS", price: "45 div (10 div for Tailwind-only)", why: "The 'smooth' item: permanent Tailwind from the first crit, Elusive, Onslaught. Your Slippers' +129 life is dead on CI (the regen isn't — Zealot's Oath — but 74% ES beats it). Gloves first, or cold drops to 59%.", link: { extra: ["boots", 0] } },
     { n: 10, group: "A · Today — 55–115 div all in", item: "Staff base with +2 spell / +4 phys spell / 20% block already rolled", price: "10–15 div", why: "05/09: an Imperial Staff with all three for 10 div (junk cold prefix to deal with), a Lathi with spell crit as well for 15. That is fubgun's craft up to step 4 for the price of the fossils. Finish: spell damage prefix (veiled), cast speed suffix, then 6-link it.", link: { extra: ["staff", 0] } },
     { n: 11, group: "A · Today — 55–115 div all in", item: "Immutable Force → socket 9797", price: "4c + 1 point", why: "fubgun's own budget substitute for the 375-div Forbidden pair: pseudo stun immunity. You already have 59585; 9797 is one more point (level 98 or the Dark Arts refund).", link: { unique: "Immutable Force", slot: "jewel", any: true } },
 
-    { n: 12, group: "B · Next — the 100–300 div block", item: "Twilight Regalia — fractured 57% Global Defences base, ilvl 86", price: "80 div (finished 80–130 div)", why: "The chest is where the rest of the ES lives: 57% global defences is ~a third of the gap on its own, and '12% phys taken as chaos' on CI deletes 12% of every physical hit. 80 div buys a finished 117% ES / 54% defences / +74 ES chest — cheaper than crafting from the fractured base. You lose +24 Str/Int with your old chest: mind the tattoo budget.", link: { extra: ["body", 0] } },
-    { n: 13, group: "B · Next — the 100–300 div block", item: "Focused Amulet — +2 all gems, then craft the multi", price: "35 div base, 190 div finished", why: "Biggest DPS item. Warning from the listings: the 35–50 div '+2 gems' amulets carry Foulborn negatives (−96% multi, −2 physical gems) — read every line. And the Citrine's +17 Dex goes: PoB Dex 108 → 91, under EK's 98 at level 20. Find Dex first. waggles' video for the craft.", link: { extra: ["amulet", 0] } },
+    { n: 12, group: "B · Next — the 100–300 div block", item: "Twilight Regalia — fractured 57% Global Defences base, ilvl 86", price: "80 div (finished 80–130 div)", why: "The chest is where the rest of the ES lives: 57% global defences is ~a third of the gap on its own, and '12% phys taken as chaos' on CI deletes 12% of every physical hit. 80 div buys a finished 117% ES / 54% defences / +74 ES chest — cheaper than crafting from the fractured base. Your old chest's +24 Str/Int and 19% cold go with it; only the cold matters.", link: { extra: ["body", 0] } },
+    { n: 13, group: "B · Next — the 100–300 div block", item: "Focused Amulet — +2 all gems, then craft the multi", price: "35 div base, 190 div finished", why: "Biggest DPS item. Warning from the listings: the 35–50 div '+2 gems' amulets carry Foulborn negatives (−96% multi, −2 physical gems) — read every line. The Citrine's 46% cold and 49 ES go with it; attributes don't matter (Supreme Ostentation). waggles' video for the craft.", link: { extra: ["amulet", 0] } },
     { n: 14, group: "B · Next — the 100–300 div block", item: "Staff finish: spell damage unveil, cast speed, 6-link", price: "~20 div in orbs", why: "fubgun's steps 5–6 on the 10-div base: 'prefixes cannot be changed' + veiled chaos for spell damage, then augment/reforge speed. Budget the fusings or bench 6L separately.", link: { tab: "setup", label: "Craft notes" } },
     { n: 15, group: "B · Next — the 100–300 div block", item: "Forbidden Flame + Forbidden Flesh (Vile Bastion)", price: "85 div + 290 div", why: "The Flesh half is 290 div — the pair is 375. It buys ES regen on kill and stun immunity. That is the whole 'smooth' argument, but Immutable Force + a block jewel is fubgun's own fallback for a fraction of it. Buy the Flame first when you're at 200 div spare.", link: { unique: "Forbidden Flame", slot: "jewel" } },
     { n: 16, group: "B · Next — the 100–300 div block", item: "Wine of the Prophet", price: "37 div", why: "In fubgun's flasks for the divination buffs (rarity/quantity/charges). Not defence, not DPS — it's a farming flask. Fill the dead life-flask slot with it when the 37 div is spare, not before the boots.", link: { unique: "Wine of the Prophet", slot: "flask", any: true } },
@@ -705,7 +700,7 @@ const DATA = {
     {
       key: "body", label: "Body Armour", cat: "armour.chest", icon: "body",
       blurb: "You already own the base and a 117% ES roll. The gap is fubgun's fractured 57% Global Defences (that one line is ~a third of the ES difference) plus 126% ES, 33% golem buff effect and 12% phys taken as chaos on the implicits.",
-      now: "Twilight Regalia: 117% ES, +125 ES, fractured +1 dex gems, 11% phys taken as cold, 19% cold+chaos res, crafted +24 str/int (tattoo budget), crafted 8% defence magnitudes.",
+      now: "Twilight Regalia: 117% ES, +125 ES, fractured +1 dex gems, 11% phys taken as cold, 19% cold+chaos res, crafted +24 str/int, crafted 8% defence magnitudes.",
       target: { budget: "Twilight Regalia: fractured 57% Global Defences, 126% ES, +115 ES, +1 dex gems, fire + cold res, implicits 33% golem buff effect + 12% phys taken as chaos, crafted 15% defence magnitudes", mirror: "Twilight Regalia: identical to budget" },
       status: { budget: "craft", mirror: "craft" },
       rare: {
@@ -779,7 +774,7 @@ const DATA = {
     {
       key: "amulet", label: "Amulet", cat: "accessory.amulet", icon: "amulet",
       blurb: "Focused Amulet: one prefix, one suffix, both doubled. fubgun's is +2 all gems / +2 physical gems / +90% multi with Disciple of the Slaughter anointed. Biggest single DPS item on the page and a craft (waggles' video in the notes). Your Citrine has +1 gems and +36% multi.",
-      now: "Citrine Amulet: +1 all gems, +36% multi, +49 ES, +17 str/dex (Dex you need: PoB 108, EK needs 98), 46% cold res, mana leech, phys to attacks. Disciple of the Slaughter anointed.",
+      now: "Citrine Amulet: +1 all gems, +36% multi, +49 ES, +17 str/dex (irrelevant — Supreme Ostentation), 46% cold res, mana leech, phys to attacks. Disciple of the Slaughter anointed.",
       target: { budget: "Focused Amulet: +2 all skill gems, +2 physical skill gems, +90% global crit multi, Disciple of the Slaughter", mirror: "Focused Amulet: identical to budget" },
       status: { budget: "craft", mirror: "craft" },
       rare: {
@@ -861,7 +856,7 @@ const DATA = {
         mustAny: [[["staffBlock", "staffBlockB", "staffBlockFr", "staffBlockFrB"], 2]],
         noBase: true,
         extra: [
-          { label: "Hypnotic Eye: 50% avoid shock + spell damage while two-handed", why: "the abyss jewel for socket 49080 now and the Warlock Gloves' socket later. The avoid-shock line is not optional: your two old Eyes carry one each, and with Stormshroud that's your 100% ailment immunity. 05/09: 4 div with 2H lightning, 14 div with 2H chaos, 35 div with chaos + multi. The 5c ones lack the line.",
+          { label: "Hypnotic Eye: 50% avoid shock + spell damage while two-handed", wgroup: "abyss", why: "the abyss jewel for socket 49080 now and the Warlock Gloves' socket later. The avoid-shock line is not optional: your two old Eyes carry one each, and with Stormshroud that's your 100% ailment immunity. 05/09: 4 div with 2H lightning, 14 div with 2H chaos, 35 div with chaos + multi. The 5c ones lack the line.",
             query: { stats: [{ type: "and", filters: [{ id: "explicit.stat_1871765599", value: { min: 50 } }] }, { type: "count", value: { min: 1 }, filters: [{ id: "explicit.stat_1743759111", value: { min: 15 } }, { id: "explicit.stat_2398198236", value: { min: 20 } }, { id: "explicit.stat_2921084940", value: { min: 10 } }] }], filters: { type_filters: { filters: { category: { option: "jewel.abyss" }, rarity: { option: "nonunique" } } } } } },
           { label: "Fractured staff-block jewel (craft base)", why: "fubgun's rare block jewels start from a fractured '% block while wielding a staff' jewel (1c on 05/09), then harvest reforge-crit until multi + multi or multi + ES, then an Allflame exalt.",
             query: { stats: [{ type: "count", value: { min: 1 }, filters: [{ id: "fractured.stat_1778298516", value: { min: 2 } }, { id: "fractured.stat_1001829678", value: { min: 2 } }] }], filters: { type_filters: { filters: { category: { option: "jewel" }, rarity: { option: "nonunique" } } } } } },

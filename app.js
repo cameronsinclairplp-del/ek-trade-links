@@ -6,7 +6,7 @@ const S = D.S;
 const DEFAULTS = {
   level: 97, budget: 100, unit: "div", divC: D.divineChaos, league: D.league, status: "securable",
   rollQ: 0.85, corrupted: "any", slot: "path", minSum: 0, minSums: {}, base: "auto", links: "auto", msMin: "auto",
-  weights: {}, phase: "budget", setup: "budget", done: {}, pathOpen: {},
+  weights: {}, phase: "budget", setup: "budget", done: {}, pathOpen: {}, pob: {}, wsrc: {},
 };
 const LS = {
   get(k, f) { try { const v = localStorage.getItem(k); return v == null ? f : JSON.parse(v); } catch (e) { return f; } },
@@ -61,6 +61,44 @@ function weightsFor(slot, st, group) {
   return (src || []).map(([k, w]) => [k, ov[k] != null ? Number(ov[k]) : w]).filter(([, w]) => w > 0);
 }
 
+// ---- weights from Path of Building's Trader ("Find best" per slot) ----
+// He pastes the trade URL PoB opens; we keep PoB's weight group (its per-mod DPS/EHP value for HIS character, on PoB's own
+// scale, and its floor = the score of the item he wears now) and add our locks. state.pob[wkey] = { type, filters, min, groups, date, n }.
+const S_BY_ID = Object.fromEntries(Object.entries(S).map(([k, v]) => [v.id, k]));
+const pobSet = (st, wk) => (st.pob && st.pob[wk]) || null;
+const weightSource = (st, wk) => pobSet(st, wk) && !(st.wsrc && st.wsrc[wk] === "hand") ? "pob" : "hand";
+// Parse a trade query (from a pasted URL) into a PoB weight set. Any weight/weight2 group → filters; and/count/not groups → kept as locks.
+function pobWeightsFrom(query) {
+  const q = query && query.query ? query.query : query;
+  const stats = (q && q.stats) || [];
+  const wg = stats.filter(g => g && (g.type === "weight" || g.type === "weight2") && g.filters && g.filters.length);
+  if (!wg.length) return null;
+  const filters = []; const seen = new Set();
+  for (const g of wg) for (const f of g.filters) { if (!f || !f.id || f.disabled) continue; const w = f.value && Number(f.value.weight); if (!(w > 0) || seen.has(f.id)) continue; seen.add(f.id); const o = { id: f.id, weight: Math.round(w * 1000) / 1000 }; if (f.value.option != null) o.option = f.value.option; filters.push(o); }
+  const min = wg[0].value && wg[0].value.min != null ? Math.round(Number(wg[0].value.min) * 100) / 100 : null;
+  const groups = stats.filter(g => g && ["and", "count", "not"].includes(g.type) && g.filters && g.filters.length).map(g => ({ type: g.type, value: g.value, filters: g.filters.filter(f => f && f.id && !f.disabled).map(f => f.value ? { id: f.id, value: f.value } : { id: f.id }) })).filter(g => g.filters.length);
+  return { type: wg[0].type, filters, min, groups, n: filters.length };
+}
+// Decode a pasted trade link (3.29 gzip hash, or the old ?q= JSON) to its query object. Node only; the browser version is async (see decodeTradeUrl).
+function decodeTradeUrlSync(u) {
+  const zlib = require("zlib");
+  const m = /\/trade2?\/search\/[^/?#]+\/([A-Za-z0-9_-]{20,})/.exec(String(u).trim());
+  if (m) return JSON.parse(zlib.gunzipSync(Buffer.from(m[1].replace(/-/g, "+").replace(/_/g, "/"), "base64")).toString());
+  const q = /[?&]q=([^&#]+)/.exec(String(u)); if (q) return JSON.parse(decodeURIComponent(q[1]));
+  throw new Error("not a trade link");
+}
+// The weight group for a card: PoB's set (with per-id overrides) or the hand weights (with per-stat overrides).
+function weightFilters(slot, st, group) {
+  const wk = wkey(slot, st, group);
+  if (weightSource(st, wk) === "pob") {
+    const p = pobSet(st, wk); const ov = (st.weights && st.weights[wk]) || {};
+    const filters = p.filters.map(f => { const w = ov[f.id] != null ? Number(ov[f.id]) : f.weight; const v = { weight: w }; if (f.option != null) v.option = f.option; return { id: f.id, value: v }; }).filter(f => f.value.weight > 0);
+    return { type: p.type || "weight", filters, groups: p.groups || [], source: "pob" };
+  }
+  const filters = weightsFor(slot, st, group).map(([k, wt]) => S[k].option != null ? { id: S[k].id, value: { option: S[k].option, weight: wt } } : { id: S[k].id, value: { weight: wt } });
+  return { type: "weight2", filters, groups: [], source: "hand" };
+}
+
 // Highest movement-speed tier you can realistically equip at this level.
 function msFloor(st) {
   if (st.msMin !== "auto" && st.msMin !== "" && st.msMin != null) return Number(st.msMin) || 0;
@@ -71,6 +109,8 @@ function msFloor(st) {
 // Rough weighted-sum floor per slot — a starting point, not gospel.
 const FLOOR = { staff: 250, helmet: 180, body: 250, gloves: 250, boots: 200, amulet: 200, jewel: 40 };
 function autoFloor(slot, st, group) {
+  const wk = wkey(slot, st, group); const p = pobSet(st, wk);
+  if (weightSource(st, wk) === "pob" && p && p.min != null) return Math.round(p.min);
   if (group === "abyss" || slot.key === "jewel") return 40;
   return FLOOR[slot.key] || 100;
 }
@@ -105,19 +145,19 @@ const statValue = (k, min) => S[k].option != null ? { option: S[k].option } : S[
 const statFilter = (k, min) => { const v = statValue(k, min); return v ? { id: S[k].id, value: v } : { id: S[k].id }; };
 
 // Minimum weighted sum for one card (per slot/group/phase), falling back to the old global value.
-const minSumFor = (slot, st, group) => { const k = wkey(slot, st, group); const v = st.minSums && st.minSums[k] != null ? st.minSums[k] : st.minSum; return Math.max(0, Number(v) || 0); };
+const minSumFor = (slot, st, group) => { const k = wkey(slot, st, group); const p = pobSet(st, k); const v = st.minSums && st.minSums[k] != null ? st.minSums[k] : (weightSource(st, k) === "pob" && p && p.min != null ? p.min : st.minSum); return Math.max(0, Number(v) || 0); };
 // Rare weighted-sum search for a slot.
 function rareQuery(slot, st, group) {
   const cat = group === "abyss" ? slot.abyss.cat : slot.cat;
-  const w = weightsFor(slot, st, group);
+  const wf = weightFilters(slot, st, group);
   const q = { status: { option: st.status }, stats: [], filters: {} };
-  q.stats.push({ type: "weight2", value: { min: Math.max(1, minSumFor(slot, st, group)) },
-    filters: w.map(([k, wt]) => S[k].option != null ? { id: S[k].id, value: { option: S[k].option, weight: wt } } : { id: S[k].id, value: { weight: wt } }) });
+  q.stats.push({ type: wf.type, value: { min: Math.max(1, minSumFor(slot, st, group)) }, filters: wf.filters });
   const v = view(slot, st);
   const msOv = st.msMin !== "auto" && st.msMin !== "" && st.msMin != null ? Number(st.msMin) || 0 : null;
   const must = (group === "abyss" ? (slot.abyss.must || []) : group ? [] : v.must).map(([k, min]) => [k, k === "moveSpeed" && msOv != null ? msOv : min]);
   if (must.length) q.stats.push({ type: "and", filters: must.map(([k, min]) => statFilter(k, min)) });
   for (const [keys, min] of (group ? [] : v.mustAny)) q.stats.push({ type: "count", value: { min: 1 }, filters: keys.map(k => statFilter(k, min)) });
+  for (const g of wf.groups) q.stats.push(g); // PoB's own required stats, if he added any before generating the link
   q.filters.type_filters = { filters: { category: { option: cat }, rarity: { option: "nonunique" } } };
   q.filters.req_filters = { filters: { lvl: { max: Number(st.level) } } };
   if (!group && st.base && st.base !== "auto" && st.base !== "any") q.type = st.base;
@@ -132,15 +172,21 @@ function rareQuery(slot, st, group) {
 }
 const rareUrl = (slot, st, group) => url(st, rareQuery(slot, st, group));
 
-// Raw pre-built search (fractured bases, craft starting points). Status + price cap are injected.
-function rawQuery(spec, st) {
+// Pre-built search (fractured bases, craft starting points, exact lines). Status + price cap are injected, and when the slot is
+// known the slot's weight group is put first (no floor) so the locks filter and the weighted sum ranks — click "Sum:" to sort.
+function rawQuery(spec, st, slot, wgroup) {
   const q = JSON.parse(JSON.stringify(spec));
   q.status = { option: st.status };
   q.stats = q.stats || [];
+  if (slot) {
+    const g = wgroup === "abyss" && slot.abyss ? "abyss" : undefined;
+    const wf = weightFilters(slot, st, g);
+    if (wf.filters.length) q.stats.unshift({ type: wf.type, value: { min: 1 }, filters: wf.filters });
+  }
   baseFilters(st, q);
-  return { query: q, sort: { price: "asc" } };
+  return { query: q, sort: slot ? { "statgroup.0": "desc" } : { price: "asc" } };
 }
-const rawUrl = (spec, st) => url(st, rawQuery(spec, st));
+const rawUrl = (spec, st, slot, wgroup) => url(st, rawQuery(spec, st, slot, wgroup));
 
 // Cluster jewel search. spec: { type, small (S key with option), passives [min,max], sockets, notables [S keys], also [S keys] }
 function clusterQuery(spec, st) {
@@ -284,13 +330,13 @@ function shopUrl(item, st) {
   }
   if (l.rare) { const slot = D.slots.find(x => x.key === l.rare); return rareUrl(slot, Object.assign({}, st2, { base: "auto", minSum: st2.minSum || 0 })); }
   if (l.raw) return rawUrl(l.raw, st2);
-  if (l.extra) { const slot = D.slots.find(x => x.key === l.extra[0]); const ex = (slot.rare.extra || [])[l.extra[1]]; return ex ? rawUrl(ex.query, st2) : null; }
+  if (l.extra) { const slot = D.slots.find(x => x.key === l.extra[0]); const ex = (slot.rare.extra || [])[l.extra[1]]; return ex ? rawUrl(ex.query, st2, slot, ex.wgroup) : null; }
   if (l.cluster) { const slot = D.slots.find(x => x.key === "jewel"); const c = slot.clusters[l.cluster]; return c ? clusterUrl(c, st2) : null; }
   if (l.gem) return gemUrl(l.gem, st2);
   return null;
 }
 
-if (typeof module !== "undefined") module.exports = { rareQuery, rawQuery, uniqueQuery, flaskQuery, gemQuery, gemLinks, gemLinksAll, haveOf, clusterQuery, shopUrl, rareUrl, uniqueUrl, hashQuerySync, view, basePick, weightsFor, budgetChaos, loadout, rollText, msFloor, autoFloor, exchangeQuery, exchangeUrl, pathSteps, stepDone, pathProgress, pathUrl, DEFAULTS };
+if (typeof module !== "undefined") module.exports = { rareQuery, rawQuery, uniqueQuery, flaskQuery, gemQuery, gemLinks, gemLinksAll, haveOf, clusterQuery, shopUrl, rareUrl, uniqueUrl, hashQuerySync, view, basePick, weightsFor, weightFilters, weightSource, pobWeightsFrom, decodeTradeUrlSync, minSumFor, budgetChaos, loadout, rollText, msFloor, autoFloor, exchangeQuery, exchangeUrl, pathSteps, stepDone, pathProgress, pathUrl, wkey, DEFAULTS };
 
 // ---------- DOM ----------
 if (typeof document !== "undefined") {
@@ -340,6 +386,20 @@ if (typeof document !== "undefined") {
     await Promise.all(as.map(async a => { const real = await realUrl(a.getAttribute("href")); if (run === hydrateRun) { a.setAttribute("href", real); a.classList.remove("is-pending"); } }));
   }
   document.addEventListener("click", e => { const a = e.target.closest && e.target.closest("a.is-pending"); if (a) e.preventDefault(); });
+
+  // ---- PoB weight sets: labels for trade stat ids (lazy file), URL decoding in the browser ----
+  let LABELS = null, labelsLoading = false;
+  function loadLabels() {
+    if (LABELS || labelsLoading) return; labelsLoading = true;
+    fetch("stat-labels.json").then(r => r.ok ? r.json() : null).then(j => { LABELS = j || {}; render(); }).catch(() => { LABELS = {}; });
+  }
+  const labelFor = id => { const k = S_BY_ID[id]; if (k) return S[k].label.replace(/ \(.*\)$/, ""); const bare = id.replace(/^[a-z]+\./, ""); const kind = /^([a-z]+)\./.exec(id); const base = LABELS && LABELS[bare]; return base ? (kind && kind[1] !== "explicit" ? `${base} (${kind[1]})` : base) : id; };
+  async function decodeTradeUrl(u) {
+    const m = /\/trade2?\/search\/[^/?#]+\/([A-Za-z0-9_-]{20,})/.exec(String(u).trim());
+    if (m) { const bin = atob(m[1].replace(/-/g, "+").replace(/_/g, "/")); const bytes = Uint8Array.from(bin, c => c.charCodeAt(0)); const ds = new DecompressionStream("gzip"); const w = ds.writable.getWriter(); w.write(bytes); w.close(); return JSON.parse(await new Response(ds.readable).text()); }
+    const q = /[?&]q=([^&#]+)/.exec(String(u)); if (q) return JSON.parse(decodeURIComponent(q[1]));
+    throw new Error("That isn't a trade link");
+  }
 
   // ---- settings panel ----
   function settingsSummary() {
@@ -399,9 +459,20 @@ if (typeof document !== "undefined") {
   // ---- slot page ----
   function weightRows(slot, group) {
     const v = view(slot, state);
-    const src = group === "abyss" ? v.abyssW : v.w;
     const key = wkey(slot, state, group);
     const ov = state.weights[key] || {};
+    if (weightSource(state, key) === "pob") {
+      const p = pobSet(state, key); if (!LABELS) loadLabels();
+      return p.filters.map((f, i) => {
+        const cur = ov[f.id] != null ? ov[f.id] : f.weight;
+        const id = `w-${key.replace(/[^a-z0-9]/gi, "-")}-p${i}`;
+        return `<div class="flex items-center justify-between gap-x-3 py-1">
+        <label for="${id}" class="min-w-0 flex-1 truncate py-2 text-sm text-ink-2" title="${esc(f.id)}">${esc(labelFor(f.id))}${f.option != null ? ` <span class="text-ink-3">(option ${esc(f.option)})</span>` : ""}</label>
+        <input id="${id}" type="number" step="0.01" min="0" inputmode="decimal" data-wkey="${key}" data-stat="${esc(f.id)}" value="${cur}" class="field num w-28 shrink-0 text-right ${cur !== f.weight ? "text-accent-text" : ""}" />
+      </div>`;
+      }).join("");
+    }
+    const src = group === "abyss" ? v.abyssW : v.w;
     return src.map(([k, w]) => {
       const cur = ov[k] != null ? ov[k] : w;
       const id = `w-${key.replace(/[^a-z0-9]/gi, "-")}-${k}`;
@@ -419,6 +490,16 @@ if (typeof document !== "undefined") {
     const parts = must.map(([k, min]) => S[k].flag ? clean(k) : `${clean(k)} ≥ ${k === "moveSpeed" && state.msMin !== "auto" && state.msMin !== "" ? state.msMin : min}`);
     for (const [keys, min] of (group ? [] : v.mustAny)) parts.push(`${clean(keys[0])} ≥ ${min} (explicit or fractured)`);
     return parts.length ? `<p class="mt-2 text-xs/5 text-ink-3"><span class="font-medium text-ink-2">Hard filters</span> · ${parts.join(" · ")}</p>` : "";
+  }
+
+  // "Weights from Path of Building": paste box + status for one card.
+  function pobBlock(slot, group, wk) {
+    const p = pobSet(state, wk); const src = weightSource(state, wk); const did = `d-pob-${wk.replace(/[^a-z0-9]/gi, "-")}`;
+    const status = p ? `<div class="mt-3 flex flex-wrap items-center gap-2">${src === "pob" ? badge(`Using PoB's ${p.n} weights`, "badge-ok") : badge("PoB weights saved, not in use", "badge-muted")}<span class="meta">pasted ${esc(p.date || "")}${p.min != null ? ` · PoB's floor ${esc(p.min)} = what you wear now scores` : ""}${p.groups && p.groups.length ? ` · ${p.groups.length} required-stat group${p.groups.length > 1 ? "s" : ""} from PoB kept as locks` : ""}</span>
+        ${src === "pob" ? `<button type="button" data-pob-src="hand" class="btn btn-ghost btn-sm">Use hand weights</button>` : `<button type="button" data-pob-src="pob" class="btn btn-secondary btn-sm">Use PoB weights</button>`}<button type="button" data-pob-forget class="btn btn-ghost btn-sm">Forget</button></div>` : "";
+    return `<details class="disc" id="${did}" data-pob-details><summary><span>Weights from Path of Building <span class="font-normal text-ink-3">— ${p ? (src === "pob" ? "in use" : "saved") : "paste PoB's Find-best link"}</span></span>${DISC_CHEV}</summary>
+      <p class="hint mt-2">PoB → Items → <span class="text-ink-2">Trade for these items</span> → <span class="text-ink-2">Find best</span> on this slot → copy the trade link it opens and paste it here. PoB's weights are what each mod is worth to <em>your</em> character on PoB's own scale; the locks and price cap on this card are added on top, so the result is fubgun's item shape ranked by your numbers. PoB's floor (the score of the item you wear) becomes the min sum — lower it to see sidegrades.</p>
+      <div class="mt-2 flex flex-col gap-2 sm:flex-row"><input type="url" data-pob-url aria-label="PoB trade link" placeholder="https://www.pathofexile.com/trade/search/${esc(state.league)}/H4sI…" class="field min-w-0 flex-1" /><button type="button" data-pob-use class="btn btn-secondary">Use these weights</button></div>${status}</details>`;
   }
 
   function rareCard(slot, group) {
@@ -440,7 +521,7 @@ if (typeof document !== "undefined") {
         ${bp.now && bp.now.why && state.base === "auto" ? `<p class="hint">${esc(bp.now.why)}</p>` : ""}${v.note ? `<p class="hint">${esc(v.note)}</p>` : ""}</div>`;
     }
     const msId = group ? "r-minsum-abyss" : "r-minsum";
-    let optHtml = `<div><label for="${msId}" class="lbl">Min weighted sum</label><div class="mt-1 flex gap-2"><input id="${msId}" type="number" min="0" inputmode="numeric" value="${minSumFor(slot, state, group)}" class="field num" /><button id="${msId}-floor" type="button" class="btn btn-ghost whitespace-nowrap">Auto ≈ ${autoFloor(slot, state, group)}</button></div><p class="hint">0 = no floor. Auto is a rough "worth reading" guess — raise it if the top results look weak.</p></div>`;
+    let optHtml = `<div><label for="${msId}" class="lbl">Min weighted sum</label><div class="mt-1 flex gap-2"><input id="${msId}" type="number" min="0" inputmode="numeric" value="${minSumFor(slot, state, group)}" class="field num" /><button id="${msId}-floor" type="button" class="btn btn-ghost whitespace-nowrap">Auto ≈ ${autoFloor(slot, state, group)}</button></div><p class="hint">${weightSource(state, wk) === "pob" ? "0 = no floor. Auto = PoB's floor: the score of the item you wear now, so only upgrades show. Lower it to see sidegrades." : "0 = no floor. Auto is a rough \"worth reading\" guess — raise it if the top results look weak."}</p></div>`;
     if (!group && slot.rare.links) optHtml += `<div><label for="r-links" class="lbl">Links</label><div class="mt-1 grid grid-cols-1"><select id="r-links" class="select"><option value="auto" ${state.links === "auto" ? "selected" : ""}>6L (default)</option><option value="0" ${state.links === "0" ? "selected" : ""}>Any</option><option value="5" ${state.links === "5" ? "selected" : ""}>5L+</option><option value="6" ${state.links === "6" ? "selected" : ""}>6L</option></select>${CHEV}</div></div>`;
     if (!group && slot.rare.must && slot.rare.must.some(([k]) => k === "moveSpeed")) { const spec = (v.must.find(([k]) => k === "moveSpeed") || [])[1]; optHtml += `<div><label for="r-ms" class="lbl">Min movement speed %</label><input id="r-ms" type="number" min="0" max="35" inputmode="numeric" placeholder="spec: ${spec}" value="${state.msMin === "auto" ? "" : state.msMin}" class="field num mt-1" /><p class="hint">Blank = the spec's floor (${spec}%). fubgun's budget boots are 28%.</p></div>`; }
 
@@ -449,7 +530,8 @@ if (typeof document !== "undefined") {
       ${baseHtml}
       <div class="card-hd"><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">${optHtml}</div></div>
       <div class="card-hd">
-        <details class="disc" id="d-${wk.replace(/[^a-z0-9]/gi, "-")}"><summary><span>Weights <span class="font-normal text-ink-3">— edit to adapt, saved in this browser</span></span>${DISC_CHEV}</summary>
+        ${pobBlock(slot, group, wk)}
+        <details class="disc mt-3" id="d-${wk.replace(/[^a-z0-9]/gi, "-")}"><summary><span>Weights <span class="font-normal text-ink-3">— ${weightSource(state, wk) === "pob" ? `PoB's ${pobSet(state, wk).n}, edit to adapt` : "hand-picked from fubgun's items, edit to adapt"}, saved in this browser</span></span>${DISC_CHEV}</summary>
         <div class="mt-3 divide-y divide-line">${weightRows(slot, group)}</div>
         <div class="mt-3 flex gap-2"><button type="button" data-reset="${wk}" class="btn btn-ghost btn-sm">Reset weights</button></div></details>
       </div>
@@ -462,7 +544,25 @@ if (typeof document !== "undefined") {
     card.querySelectorAll("input[data-wkey]").forEach(inp => inp.addEventListener("change", () => {
       const k = inp.dataset.wkey; state.weights[k] = state.weights[k] || {}; state.weights[k][inp.dataset.stat] = Number(inp.value); save(); render();
     }));
+    if (weightSource(state, wk) === "pob" && !LABELS) loadLabels();
     card.querySelectorAll("[data-reset]").forEach(b => b.addEventListener("click", () => { delete state.weights[b.dataset.reset]; save(); render(); toast("Weights reset"); }));
+    const pobIn = card.querySelector("[data-pob-url]"), pobUse = card.querySelector("[data-pob-use]");
+    const usePob = async () => {
+      const u = pobIn.value.trim(); if (!u) { toast("Paste the trade link first"); pobIn.focus(); return; }
+      if (typeof DecompressionStream === "undefined") { toast("This browser can't decode trade links"); return; }
+      try {
+        const q = await decodeTradeUrl(u); const set = pobWeightsFrom(q);
+        if (!set) { toast("No weighted-sum group in that link — use PoB's Find best"); return; }
+        set.date = new Date().toLocaleDateString("en-AU", { day: "2-digit", month: "2-digit", year: "numeric" });
+        state.pob = state.pob || {}; state.pob[wk] = set; state.wsrc = state.wsrc || {}; delete state.wsrc[wk]; state.weights[wk] = {}; if (state.minSums) delete state.minSums[wk];
+        save(); render(); toast(`Using PoB's ${set.n} weights`);
+      } catch (e) { toast(e.message || "Couldn't read that link"); }
+    };
+    if (pobUse) pobUse.addEventListener("click", usePob);
+    if (pobIn) pobIn.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); usePob(); } });
+    card.querySelectorAll("[data-pob-src]").forEach(b => b.addEventListener("click", () => { state.wsrc = state.wsrc || {}; if (b.dataset.pobSrc === "hand") state.wsrc[wk] = "hand"; else delete state.wsrc[wk]; if (state.minSums) delete state.minSums[wk]; save(); render(); }));
+    const pobForget = card.querySelector("[data-pob-forget]"); if (pobForget) pobForget.addEventListener("click", () => { delete state.pob[wk]; if (state.wsrc) delete state.wsrc[wk]; delete state.weights[wk]; if (state.minSums) delete state.minSums[wk]; save(); render(); toast("PoB weights forgotten"); });
+    const pdet = card.querySelector("details[data-pob-details]"); if (pdet) { if (openDetails.has(pdet.id)) pdet.open = true; pdet.addEventListener("toggle", () => { pdet.open ? openDetails.add(pdet.id) : openDetails.delete(pdet.id); }); }
     const bind = (id, key, num) => { const el = card.querySelector("#" + id); if (el) el.addEventListener("change", () => { state[key] = num ? Number(el.value) : el.value; save(); render(); }); };
     const ms = card.querySelector("#" + msId); if (ms) ms.addEventListener("change", () => { state.minSums = state.minSums || {}; state.minSums[wk] = Number(ms.value) || 0; save(); render(); });
     bind("r-links", "links"); bind("r-base", "base");
@@ -470,7 +570,7 @@ if (typeof document !== "undefined") {
     const fl = card.querySelector("#" + msId + "-floor"); if (fl) fl.addEventListener("click", () => { state.minSums = state.minSums || {}; state.minSums[wk] = autoFloor(slot, state, group); save(); render(); });
     const bpick = card.querySelector("#r-base-pick"); if (bpick && bp) bpick.addEventListener("click", () => { state.base = v.base || (bp.now && bp.now.name) || "auto"; save(); render(); });
     const bany = card.querySelector("#r-base-any"); if (bany) bany.addEventListener("click", () => { state.base = "any"; save(); render(); });
-    const det = card.querySelector("details"); if (det && openDetails.has(det.id)) det.open = true;
+    const det = card.querySelector("details:not([data-pob-details])"); if (det && openDetails.has(det.id)) det.open = true;
     if (det) det.addEventListener("toggle", () => { det.open ? openDetails.add(det.id) : openDetails.delete(det.id); });
     return card;
   }
@@ -480,8 +580,9 @@ if (typeof document !== "undefined") {
     const v = view(slot, state);
     if (!v.extra.length) return null;
     const card = h("section", "card"); card.setAttribute("aria-label", "Craft starts and exact searches");
-    card.innerHTML = `<div class="card-hd"><h3 class="h3">Craft starts and exact searches</h3><p class="p3 prose-w mt-1">Fixed searches for the fractured base or the one line that makes the item. Price cap and seller status from Settings still apply.</p></div>
-      <ul role="list" class="rows">${v.extra.map(x => `<li class="row"><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-ink">${esc(x.label)}</p><p class="p3 prose-w mt-1">${esc(x.why)}</p></div><div class="flex shrink-0 gap-2">${tlink(rawUrl(x.query, state), "btn-secondary", "Open")}</div></li>`).join("")}</ul>`;
+    const src = weightSource(state, wkey(slot, state));
+    card.innerHTML = `<div class="card-hd"><h3 class="h3">Craft starts and exact searches</h3><p class="p3 prose-w mt-1">The locks that make the item (AND / count groups) plus this slot's weighted sum — ${src === "pob" ? "PoB's weights" : "the hand weights above"} — with no floor, so the locks filter and the sum ranks. Click <span class="font-semibold text-ink-2">Sum:</span> on a result to sort best-first. Price cap and seller status from Settings still apply.</p></div>
+      <ul role="list" class="rows">${v.extra.map(x => `<li class="row"><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-ink">${esc(x.label)}</p><p class="p3 prose-w mt-1">${esc(x.why)}</p></div><div class="flex shrink-0 gap-2">${tlink(rawUrl(x.query, state, slot, x.wgroup), "btn-secondary", "Open weighted")}</div></li>`).join("")}</ul>`;
     return card;
   }
 
