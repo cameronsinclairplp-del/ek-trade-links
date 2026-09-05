@@ -1,4 +1,12 @@
-## CAMERON NOW (dqeik0qu)
+## CAMERON NOW (ipgiz0qx, decoded 05/09/2026 — items identical to dqeik0qu below)
+Changes since dqeik0qu: level 96 → 97; PoB config now matches fubgun's (charges, ailments, intensity 4 / OI 3, Hive pressure 50, boss, Tailwind/Onslaught/Elusive, pantheon Lunaris + Yugul); ascendancy Shaper of Flames → Bastion of Elements (Primal Aegis granted); tree +4917 (Bastion), +59585 (small jewel socket, empty), +6052 (Elemental Damage and Resistances), −12738, −53123 (Shaper of Flames). Flasks still not ticked in PoB. Character name confirmed in game: Fornaxx (account Chexer).
+
+Tree overrides (the part the item dump never shows): 5× Tattoo of the Valako Shieldbearer (+1% attack block each, on Strength nodes 34171, 23027, 44202, 29353, 60472), Runegraft of the Fortress on the Minion Defence Mastery node 26393 (10% reduced Attributes, 40% increased Defences), Runegraft of Treachery on node 12125 — NOT allocated, does nothing. fubgun (budget): the same 5 Valako + Fortress, plus 17 active Tattoos of the Arohongui Shaman (5% increased Effect of Herald Buffs each) on Intelligence nodes; 6 Ramako Sniper + 5 Hinekora Warrior + 6 more Arohongui sit on nodes his tree doesn't allocate. Cameron's 22 allocated Intelligence nodes: 39841, 63447, 26270, 36678, 15117, 49651, 4367, 37671, 7444, 49605, 19501, 38176, 11551, 44184, 60440, 32210, 5296, 8948, 48778, 21678, 64210, 33310 (fubgun tattoos 17 of them).
+
+Real tree diff vs fubgun budget (3.29 node ids): Cameron-only Dark Arts 39743 (dual-wield only — dead); fubgun-only Deep Wisdom 27929 (adjacent to 8948), Steeped in the Profane 53652, Tolerance 10511, small jewel socket 9797. Everything else that differs is cluster-jewel notables (ids ≥ 65536). Masteries identical.
+
+Avoid-shock check: Enthralling Stare (49080) and Whispering Sphere (61419) each carry "50% chance to Avoid being Shocked" → with Stormshroud, 100% elemental ailment avoidance. fubgun: Foul Gaze (49080) + Enthralling Globe (gloves' abyssal socket), same two lines.
+
 ### Weapon 1: Woe Bane (RARE, Imperial Staff)
   _Item Level: 87_
   _Quality: 20_
