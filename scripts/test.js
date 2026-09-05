@@ -76,8 +76,8 @@ ok(A.rareQuery(boots, Object.assign({}, A.DEFAULTS, { msMin: 30 })).query.stats.
       for (const k of ["how", "watch", "learn"]) if (st[k] != null) ok(Array.isArray(st[k]) && st[k].every(x => typeof x === "string" && x.length), `step ${st.id}: ${k} must be a list of strings`); } }
   const prog = A.pathProgress(A.DEFAULTS); ok(prog.total === n && n === A.pathSteps().length, "path step count");
   const pobDone = A.pathSteps().filter(x => x.step.pob === "done").length; ok(prog.done === pobDone, `default done = PoB-verified steps (${prog.done} vs ${pobDone})`);
-  ok(prog.next && prog.next.step.id === "config", `first open step is the config/flasks step (got ${prog.next && prog.next.step.id})`);
-  const st2 = Object.assign({}, A.DEFAULTS, { done: { config: true, asc: false } }); const p2 = A.pathProgress(st2); ok(p2.done === pobDone && p2.next.step.id === "asc", "checkbox overrides the PoB flag both ways");
+  ok(prog.next && prog.next.step.id === "tree", `first open step is the tree step (got ${prog.next && prog.next.step.id})`);
+  const st2 = Object.assign({}, A.DEFAULTS, { done: { tree: true, asc: false } }); const p2 = A.pathProgress(st2); ok(p2.done === pobDone && p2.next.step.id === "asc", "checkbox overrides the PoB flag both ways");
   ok(prog.stages.length === P.stages.length && prog.stages.reduce((a, s) => a + s.total, 0) === n, "per-stage tallies");
   const x = A.exchangeUrl({ have: "chaos", want: "tattoo-of-the-arohongui-shaman" }, A.DEFAULTS); ok(/^https:\/\/www\.pathofexile\.com\/trade\/exchange\/Allflame\/H4sI/.test(x), "exchange url shape");
   const zlib = require("zlib"); const dec = JSON.parse(zlib.gunzipSync(Buffer.from(x.split("/").pop().replace(/-/g, "+").replace(/_/g, "/"), "base64")).toString());
@@ -92,6 +92,28 @@ ok(A.rareQuery(boots, Object.assign({}, A.DEFAULTS, { msMin: 30 })).query.stats.
   const hq = A.rareQuery(D.slots.find(s => s.key === "helmet"), A.DEFAULTS).query; ok(!hq.stats.some(g => g.type === "and" && g.filters.some(f => f.id === D.S.avoidShock.id)), "avoid-shock must does not leak into other slots"); }
 // shop: done flag, numbering, tattoos first block
 ok(D.shop.every((it, i) => it.n === i + 1), "shop numbered 1..n"); ok(D.shop[0].done === true && /Tattoo/.test(D.shop[1].item), "shop: config done, tattoos second");
-ok(D.pob.now === "ipgiz0qx" && A.DEFAULTS.level === 97, "PoB id and level updated");
+ok(D.pob.now === "glis80qp" && A.DEFAULTS.level === 97, "PoB id and level updated");
+// PoB weight sets: decode his helmet Find-best link, use it on the helmet card, and every helmet search carries it under the locks
+{ const url = "https://www.pathofexile.com/trade/search/Allflame/H4sIAAAAAAAACqVW227bRhD9Fz4bi7lf9CtBIagOkxCQJYei2gaG_r3Y2GjtYCdwEL6QBBeHM-ecuTxNl-2wXS_T7mk6P27L-TTtpst8f10Pfx7n6Xb3_ftl2n14mrZvj_O0m_6el89ftulu-rQct3l9_rZ8nHbT42W-fjy359t-O2-H4_7Tss77db4sl-1wup-nu-mvw_E69_-9AO2yBbmZB7Oz0e1294I3__N4XO6XrfUY9kSuxJQ6wqBsjsiB6QFm_2MsD7-P8TYO49RUVBphcGNTVhIOT-AKg1UtSBJzBIJNLDMlySQcS0KEVdnScAQCTZJRQSADHUtarWfriUNKtCVwMgWohdbScIS6sPswHW9GhsTJoZ4lJ9ZZF3IZc-KqlGGSElrpK6hCmuLDbKyFAwShGASXgQhqsBOPk2lAQcJCEGhSGo3DhZjYxtpghJgDpAJwaRNSRHYIjHHdGJqiuRAmaAkSjGjKY16hoacxpgShQkkKIjOgaXKVEJuYplNClkZxF9AUGdYONBRjcQuzn0TCKAhdx6HG0EQYCZTIncjr4rEUNKdhBb4I1K0kEFGjOIZld8vYb2qWBr2lKEfpN1ACdqkSIuZeFukZ9pMaVMfIBBnKrI2ZiFgU0dJL20pQKGkUfQkE2Xs_QIvScJiZvY9SZbgUB2JGUxUpZWZCowQpWHkfigCqEULpuLQkV0A0gLLlEwNwZmiVEWCGs3cdodSZlTjMs9IZkwTRUTMiK4WYEz2hKkPt2XAwB0rdndhAUsz8F1F-YAWNIF3Gk_C9sSiJp7sUQ-ydobj0pmFYCAQhIL0fk6VKqRCJsCRRVDDk7JysYiZSTiHOCJZ0GE4QaIDJHgZMCap4u_3x6tjDcuqrCDTVblsBo_h-4r9163kT2796f_V4f9jmz-f125uF7rA-nK9r-zIfH-atL3XrYV22t2dO59P1tHy9ztOtX_8CH0ddxxkKAAA";
+  const q = A.decodeTradeUrlSync(url); const set = A.pobWeightsFrom(q);
+  ok(set && set.type === "weight" && set.n === 34 && set.min === 290.55 && set.filters[0].id === "pseudo.pseudo_total_fire_resistance" && set.filters[0].weight === 9.828, `PoB link decodes to 34 weights, floor 290.55 (${set && set.n}, ${set && set.min})`);
+  ok(A.pobWeightsFrom({ stats: [{ type: "and", filters: [{ id: "explicit.stat_1", value: { min: 1 } }] }] }) === null, "no weight group → null");
+  const helmet = D.slots.find(s => s.key === "helmet"); const wk = A.wkey(helmet, A.DEFAULTS);
+  const st = Object.assign({}, A.DEFAULTS, { pob: { [wk]: set } });
+  ok(A.weightSource(st, wk) === "pob" && A.weightSource(A.DEFAULTS, wk) === "hand" && A.weightSource(Object.assign({}, st, { wsrc: { [wk]: "hand" } }), wk) === "hand", "weight source: pob when pasted, hand when switched back");
+  const rq = A.rareQuery(helmet, st).query;
+  ok(rq.stats[0].type === "weight" && rq.stats[0].filters.length === 34 && rq.stats[0].value.min === 290.55 && rq.stats.some(g => g.type === "and" && g.filters.some(f => f.id === D.S.esPct.id)), "helmet card: PoB weights first, PoB floor, our ES lock kept");
+  ok(A.minSumFor(helmet, st) === 290.55 && A.minSumFor(helmet, A.DEFAULTS) === 0, "min sum defaults to PoB's floor only when PoB weights are active");
+  ok(A.autoFloor(helmet, st) === 291 && A.autoFloor(helmet, A.DEFAULTS) === 180, "auto floor = PoB floor when active");
+  const ov = Object.assign({}, st, { weights: { [wk]: { "pseudo.pseudo_total_fire_resistance": 0 } } }); ok(A.rareQuery(helmet, ov).query.stats[0].filters.length === 33, "a PoB weight set to 0 drops out");
+  const ex = A.rawQuery(helmet.rare.extra[3].query, st, helmet).query; ok(ex.stats[0].type === "weight" && ex.stats[0].value.min === 1 && ex.stats[0].filters.length === 34 && ex.stats[1].type === "and" && ex.type === "Lich's Circlet", "helmet extra: PoB weights (no floor) then the locks, base kept");
+  const exh = A.rawQuery(helmet.rare.extra[3].query, A.DEFAULTS, helmet).query; ok(exh.stats[0].type === "weight2" && exh.stats[0].filters.length === helmet.rare.w.length, "helmet extra with hand weights: weight2 group first");
+  const shopH = D.shop.find(it => it.link && it.link.extra && it.link.extra[0] === "helmet"); const su = A.shopUrl(shopH, st); const zlib = require("zlib"); const dec = JSON.parse(zlib.gunzipSync(Buffer.from(su.split("/").pop().replace(/-/g, "+").replace(/_/g, "/"), "base64")).toString());
+  ok(dec.stats[0].type === "weight" && dec.stats[0].filters.length === 34, "shop link for the helmet carries the PoB weights");
+  const jewel = D.slots.find(s => s.key === "jewel"); const eye = A.rawQuery(jewel.rare.extra[0].query, A.DEFAULTS, jewel, jewel.rare.extra[0].wgroup).query;
+  ok(eye.stats[0].type === "weight2" && eye.stats[0].filters.some(f => f.id === D.S.spellChaos2H.id) && !eye.stats[0].filters.some(f => f.id === D.S.staffBlock.id) && eye.stats.some(g => g.type === "and" && g.filters.some(f => f.id === D.S.avoidShock.id)), "Hypnotic Eye extra uses the abyss weights and keeps the avoid-shock lock");
+  const blk = A.rawQuery(jewel.rare.extra[2].query, A.DEFAULTS, jewel).query; ok(blk.stats[0].filters.some(f => f.id === D.S.staffBlock.id), "block-jewel extra uses the jewel weights");
+  for (const s of D.slots) if (s.rare) for (const x of s.rare.extra || []) { const qq = A.rawQuery(x.query, A.DEFAULTS, s, x.wgroup).query; ok(qq.stats[0].type === "weight2" && qq.stats[0].filters.length > 0 && JSON.stringify(qq).length < 8000, `${s.key} extra '${x.label.slice(0, 30)}' is weighted`); }
+  ok(A.rawQuery({ stats: [] }, A.DEFAULTS).query.stats.length === 0, "raw query without a slot stays unweighted"); }
 console.log(fails ? `${fails} failure(s)` : "all checks passed");
 process.exit(fails ? 1 : 0);
