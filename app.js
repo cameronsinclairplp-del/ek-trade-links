@@ -4,9 +4,9 @@ const S = D.S;
 
 // ---------- state ----------
 const DEFAULTS = {
-  level: 96, budget: 100, unit: "div", divC: D.divineChaos, league: D.league, status: "securable",
-  rollQ: 0.85, corrupted: "any", slot: "shop", minSum: 0, minSums: {}, base: "auto", links: "auto", msMin: "auto",
-  weights: {}, phase: "budget", setup: "budget",
+  level: 97, budget: 100, unit: "div", divC: D.divineChaos, league: D.league, status: "securable",
+  rollQ: 0.85, corrupted: "any", slot: "path", minSum: 0, minSums: {}, base: "auto", links: "auto", msMin: "auto",
+  weights: {}, phase: "budget", setup: "budget", done: {}, pathOpen: {},
 };
 const LS = {
   get(k, f) { try { const v = localStorage.getItem(k); return v == null ? f : JSON.parse(v); } catch (e) { return f; } },
@@ -89,7 +89,10 @@ async function hashQuery(q) {
 // In node the URL is final; in the browser it is a "poe:" placeholder that hydrateLinks() turns into the real link.
 // Accepts either a bare query or the {query, sort} pair the builders return; only the query goes into the hash.
 const url = (st, r) => { const q = r && r.query ? r.query : r; return typeof document === "undefined" ? TRADE(st.league) + hashQuerySync(q) : "poe:" + encodeURIComponent(st.league) + "/" + JSON.stringify(q); };
-const realUrl = async ph => { const i = ph.indexOf("/"); const league = ph.slice(4, i); const q = JSON.parse(ph.slice(i + 1)); return `https://www.pathofexile.com/trade/search/${league}/` + await hashQuery(q); };
+// Bulk exchange (tattoos, currency): same hash scheme on /trade/exchange/<league>/, bare {status, have, want} (verified live 05/09/2026).
+const TRADEX = league => `https://www.pathofexile.com/trade/exchange/${encodeURIComponent(league)}/`;
+const xurl = (st, q) => typeof document === "undefined" ? TRADEX(st.league) + hashQuerySync(q) : "poex:" + encodeURIComponent(st.league) + "/" + JSON.stringify(q);
+const realUrl = async ph => { const x = ph.startsWith("poex:"); const i = ph.indexOf("/"); const league = ph.slice(x ? 5 : 4, i); const q = JSON.parse(ph.slice(i + 1)); return `https://www.pathofexile.com/trade/${x ? "exchange" : "search"}/${league}/` + await hashQuery(q); };
 
 function baseFilters(st, q) {
   q.filters = q.filters || {};
@@ -112,7 +115,7 @@ function rareQuery(slot, st, group) {
     filters: w.map(([k, wt]) => S[k].option != null ? { id: S[k].id, value: { option: S[k].option, weight: wt } } : { id: S[k].id, value: { weight: wt } }) });
   const v = view(slot, st);
   const msOv = st.msMin !== "auto" && st.msMin !== "" && st.msMin != null ? Number(st.msMin) || 0 : null;
-  const must = (group ? [] : v.must).map(([k, min]) => [k, k === "moveSpeed" && msOv != null ? msOv : min]);
+  const must = (group === "abyss" ? (slot.abyss.must || []) : group ? [] : v.must).map(([k, min]) => [k, k === "moveSpeed" && msOv != null ? msOv : min]);
   if (must.length) q.stats.push({ type: "and", filters: must.map(([k, min]) => statFilter(k, min)) });
   for (const [keys, min] of (group ? [] : v.mustAny)) q.stats.push({ type: "count", value: { min: 1 }, filters: keys.map(k => statFilter(k, min)) });
   q.filters.type_filters = { filters: { category: { option: cat }, rarity: { option: "nonunique" } } };
@@ -249,9 +252,29 @@ function loadout(st) {
   return D.slots.filter(s => s.target).map(s => ({ slot: s, target: s.target[ph], status: (s.status && s.status[ph]) || "buy", now: s.now }));
 }
 
+// Bulk exchange search. spec: { have: "chaos"|"divine", want: "<exchange id>" }. The exchange only knows online / any.
+function exchangeQuery(spec, st) {
+  return { status: { option: st.status === "any" ? "any" : "online" }, have: [spec.have || "chaos"], want: [spec.want] };
+}
+const exchangeUrl = (spec, st) => xurl(st, exchangeQuery(spec, st));
+
+// The Path: flat step list, done-state and progress. A step the PoB already shows as done starts ticked; the checkbox overrides.
+const pathSteps = () => (D.path ? D.path.stages : []).flatMap((stg, si) => stg.steps.map((step, i) => ({ step, stage: stg, n: `${si}.${i + 1}` })));
+const stepDone = (step, st) => st.done && st.done[step.id] != null ? !!st.done[step.id] : step.pob === "done";
+function pathProgress(st) {
+  const all = pathSteps();
+  const done = all.filter(x => stepDone(x.step, st)).length;
+  const next = all.find(x => !stepDone(x.step, st)) || null;
+  const stages = (D.path ? D.path.stages : []).map(stg => ({ key: stg.key, total: stg.steps.length, done: stg.steps.filter(s => stepDone(s, st)).length }));
+  return { total: all.length, done, next, stages };
+}
+// A Path link → URL (same forms as the shop, plus {exchange})
+function pathUrl(l, st) { return l.link ? shopUrl({ link: l.link }, st) : l.exchange ? exchangeUrl(l.exchange, st) : null; }
+
 // Shop links → URL
 function shopUrl(item, st) {
   const l = item.link || {};
+  if (l.exchange) return exchangeUrl(l.exchange, st);
   const st2 = Object.assign({}, st, l.phase ? { phase: l.phase } : {}, l.budget != null ? { budget: l.budget, unit: "div" } : {});
   if (l.unique) {
     const slot = D.slots.find(x => x.key === l.slot);
@@ -267,7 +290,7 @@ function shopUrl(item, st) {
   return null;
 }
 
-if (typeof module !== "undefined") module.exports = { rareQuery, rawQuery, uniqueQuery, flaskQuery, gemQuery, gemLinks, gemLinksAll, haveOf, clusterQuery, shopUrl, rareUrl, uniqueUrl, hashQuerySync, view, basePick, weightsFor, budgetChaos, loadout, rollText, msFloor, autoFloor, DEFAULTS };
+if (typeof module !== "undefined") module.exports = { rareQuery, rawQuery, uniqueQuery, flaskQuery, gemQuery, gemLinks, gemLinksAll, haveOf, clusterQuery, shopUrl, rareUrl, uniqueUrl, hashQuerySync, view, basePick, weightsFor, budgetChaos, loadout, rollText, msFloor, autoFloor, exchangeQuery, exchangeUrl, pathSteps, stepDone, pathProgress, pathUrl, DEFAULTS };
 
 // ---------- DOM ----------
 if (typeof document !== "undefined") {
@@ -289,6 +312,7 @@ if (typeof document !== "undefined") {
     gem: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM12 7v10M8 10l4-3 4 3M8 14l4 3 4-3",
     cart: "M3 4h2l2.5 11h10l2-7H7M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z",
     setup: "M4 6h16M4 12h16M4 18h10M18 16l2 2 3-3",
+    path: "M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6ZM9 3v15M15 6v15",
   };
   const icon = (k, cls) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="${cls || "size-5 shrink-0"}"><path d="${ICONS[k] || ICONS.jewel}"/></svg>`;
   // One meaning per colour: ok = have / yes · warn = craft / if cheap · info = option / spec · accent = buy now · lock = variant locked · muted = skip / granted.
@@ -306,12 +330,12 @@ if (typeof document !== "undefined") {
   function toast(msg) {
     const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 2200);
   }
-  async function copy(text) { try { if (text.startsWith("poe:")) text = await realUrl(text); await navigator.clipboard.writeText(text); toast("Link copied"); } catch (e) { toast("Copy failed — open the link instead"); } }
+  async function copy(text) { try { if (text.startsWith("poe")) text = await realUrl(text); await navigator.clipboard.writeText(text); toast("Link copied"); } catch (e) { toast("Copy failed — open the link instead"); } }
   // Turn "poe:" placeholders into real gzip-hash trade links (async, a few ms for a page of links). Links are inert until then.
   let hydrateRun = 0;
   async function hydrateLinks() {
     const run = ++hydrateRun;
-    const as = [...document.querySelectorAll('a[href^="poe:"]')];
+    const as = [...document.querySelectorAll('a[href^="poe:"], a[href^="poex:"]')];
     if (typeof CompressionStream === "undefined") { as.forEach(a => { a.removeAttribute("href"); a.classList.remove("is-pending"); a.setAttribute("aria-disabled", "true"); a.title = "This browser can't build trade links (no CompressionStream)"; }); if (as.length) toast("This browser can't build trade links — try Chrome, Edge, Firefox or Safari 16.4+"); return; }
     await Promise.all(as.map(async a => { const real = await realUrl(a.getAttribute("href")); if (run === hydrateRun) { a.setAttribute("href", real); a.classList.remove("is-pending"); } }));
   }
@@ -388,11 +412,12 @@ if (typeof document !== "undefined") {
     }).join("");
   }
 
-  function mustText(slot) {
+  function mustText(slot, group) {
     const v = view(slot, state);
     const clean = k => esc(S[k].label.replace(/ \(.*\)$/, "").replace(/^\+?#%? ?(to |increased )?/, "").replace(/^\+?% ?(to )?/, "").replace(/^# to # /, ""));
-    const parts = v.must.map(([k, min]) => S[k].flag ? clean(k) : `${clean(k)} ≥ ${k === "moveSpeed" && state.msMin !== "auto" && state.msMin !== "" ? state.msMin : min}`);
-    for (const [keys, min] of v.mustAny) parts.push(`${clean(keys[0])} ≥ ${min} (explicit or fractured)`);
+    const must = group === "abyss" ? (slot.abyss.must || []) : v.must;
+    const parts = must.map(([k, min]) => S[k].flag ? clean(k) : `${clean(k)} ≥ ${k === "moveSpeed" && state.msMin !== "auto" && state.msMin !== "" ? state.msMin : min}`);
+    for (const [keys, min] of (group ? [] : v.mustAny)) parts.push(`${clean(keys[0])} ≥ ${min} (explicit or fractured)`);
     return parts.length ? `<p class="mt-2 text-xs/5 text-ink-3"><span class="font-medium text-ink-2">Hard filters</span> · ${parts.join(" · ")}</p>` : "";
   }
 
@@ -420,7 +445,7 @@ if (typeof document !== "undefined") {
     if (!group && slot.rare.must && slot.rare.must.some(([k]) => k === "moveSpeed")) { const spec = (v.must.find(([k]) => k === "moveSpeed") || [])[1]; optHtml += `<div><label for="r-ms" class="lbl">Min movement speed %</label><input id="r-ms" type="number" min="0" max="35" inputmode="numeric" placeholder="spec: ${spec}" value="${state.msMin === "auto" ? "" : state.msMin}" class="field num mt-1" /><p class="hint">Blank = the spec's floor (${spec}%). fubgun's budget boots are 28%.</p></div>`; }
 
     const link = rareUrl(slot, state, group);
-    card.innerHTML = `<div class="card-hd"><h3 class="h3">${title}</h3><p class="p3 prose-w mt-1">${esc(group === "abyss" && slot.abyss.blurb ? slot.abyss.blurb : v.blurb)}</p>${group ? "" : mustText(slot)}</div>
+    card.innerHTML = `<div class="card-hd"><h3 class="h3">${title}</h3><p class="p3 prose-w mt-1">${esc(group === "abyss" && slot.abyss.blurb ? slot.abyss.blurb : v.blurb)}</p>${mustText(slot, group)}</div>
       ${baseHtml}
       <div class="card-hd"><div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">${optHtml}</div></div>
       <div class="card-hd">
@@ -555,10 +580,10 @@ if (typeof document !== "undefined") {
       }
       const url = shopUrl(it, state);
       const li = h("li", "grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 py-4 sm:grid-cols-[auto_1fr_auto_auto] sm:items-center");
-      li.innerHTML = `<span class="num flex size-7 shrink-0 items-center justify-center rounded-md bg-white/10 text-xs font-semibold text-ink-2" aria-hidden="true">${it.n}</span>
-        <div class="min-w-0"><p class="flex flex-wrap items-center gap-2 text-sm font-semibold ${it.skip ? "text-ink-2" : "text-ink"}"><span class="sr-only">${it.n}. </span><span>${esc(it.item)}</span>${it.skip ? badge("Skip", "badge-muted") : ""}${it.tag ? badge(esc(it.tag), "badge-info") : ""}</p><p class="p3 prose-w mt-1">${esc(it.why)}</p></div>
+      li.innerHTML = `<span class="num flex size-7 shrink-0 items-center justify-center rounded-md ${it.done ? "bg-ok/10 text-ok" : "bg-white/10 text-ink-2"} text-xs font-semibold" aria-hidden="true">${it.n}</span>
+        <div class="min-w-0"><p class="flex flex-wrap items-center gap-2 text-sm font-semibold ${it.skip || it.done ? "text-ink-2" : "text-ink"}"><span class="sr-only">${it.n}. </span><span>${esc(it.item)}</span>${it.done ? badge("Done", "badge-ok") : ""}${it.skip ? badge("Skip", "badge-muted") : ""}${it.tag ? badge(esc(it.tag), "badge-info") : ""}</p><p class="p3 prose-w mt-1">${esc(it.why)}</p></div>
         <p class="col-start-2 sm:col-start-3 sm:text-right"><span class="badge ${it.skip ? "badge-muted" : it.craft ? "badge-warn" : "badge-muted"} num">${esc(it.price)}</span></p>
-        <div class="col-start-2 flex gap-2 sm:col-start-4 sm:justify-end">${url ? tlink(url, it.skip ? "btn-ghost" : "btn-primary", "Open") : it.link && it.link.tab ? `<button type="button" data-goto="${esc(it.link.tab)}" class="btn btn-secondary">${esc(it.link.label || "Open tab")}</button>` : ""}</div>`;
+        <div class="col-start-2 flex gap-2 sm:col-start-4 sm:justify-end">${url ? tlink(url, it.skip || it.done ? "btn-ghost" : "btn-primary", "Open") : it.link && it.link.tab ? `<button type="button" data-goto="${esc(it.link.tab)}" class="btn ${it.done ? "btn-ghost" : "btn-secondary"}">${esc(it.link.label || "Open tab")}</button>` : ""}</div>`;
       ul.appendChild(li);
     }
     main.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => go(b.dataset.goto)));
@@ -568,11 +593,101 @@ if (typeof document !== "undefined") {
     const main = $("slot");
     const s = D.setup;
     const block = (title, items, intro) => { const c = h("section", "card"); c.setAttribute("aria-label", title.replace(/^\d · /, "")); c.innerHTML = `<div class="card-hd"><h3 class="h3">${title}</h3>${intro ? `<p class="p3 prose-w mt-1">${esc(intro)}</p>` : ""}</div><ul role="list" class="rows">${items.map(i => `<li class="py-2.5 text-sm/6 text-ink-2">${esc(i)}</li>`).join("")}</ul>`; return c; };
-    main.appendChild(block("1 · PoB configuration", s.config, "Copy this first — your PoB has an empty config tab, so every number it shows undersells you. Read from fubgun's PoB XML."));
+    main.appendChild(block("1 · PoB configuration", s.config, s.configDone || "Copy this first — an empty config tab undersells you. Read from fubgun's PoB XML."));
     const a = h("section", "card"); a.setAttribute("aria-label", "Ascendancy"); a.innerHTML = `<div class="card-hd"><h3 class="h3">2 · Ascendancy</h3><p class="p2 prose-w mt-1">${esc(s.ascendancy)}</p></div>`; main.appendChild(a);
     main.appendChild(block("3 · Tree diff vs fubgun (budget)", s.tree));
+    if (s.tattoos) main.appendChild(block("4 · Tattoos and Runegrafts", s.tattoos, "Read off both PoBs' tree overrides on 05/09 — the part a tree screenshot never shows."));
     const L = (href, txt, ext) => `<a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ""} class="text-accent-text underline decoration-accent/40 underline-offset-2 hover:text-ink">${txt}${ext ? '<span class="sr-only"> (new tab)</span>' : ""}</a>`;
-    const n = h("section", "card"); n.setAttribute("aria-label", "Craft notes"); n.innerHTML = `<div class="card-hd"><h3 class="h3">4 · fubgun's craft notes</h3><p class="p3 prose-w mt-1">Staff (two routes), Warlock gloves, rarity helmet, chest, Focused amulet (waggles' video), double-elevated boots (FGkorbyn's video), rare block jewels. Verbatim copy: ${L("reference/fubgun-notes.md", "reference/fubgun-notes.md")} · PoBs: ${L("https://maxroll.gg/poe/pob/" + esc(D.pob.now), "yours", true)} · ${L("https://maxroll.gg/poe/pob/" + esc(D.pob.budget), "budget", true)} · ${L("https://maxroll.gg/poe/pob/" + esc(D.pob.mirror), "mirror", true)}</p></div>`; main.appendChild(n);
+    const n = h("section", "card"); n.setAttribute("aria-label", "Craft notes"); n.innerHTML = `<div class="card-hd"><h3 class="h3">${s.tattoos ? 5 : 4} · fubgun's craft notes</h3><p class="p3 prose-w mt-1">Staff (two routes), Warlock gloves, rarity helmet, chest, Focused amulet (waggles' video), double-elevated boots (FGkorbyn's video), rare block jewels. Verbatim copy: ${L("reference/fubgun-notes.md", "reference/fubgun-notes.md")} · PoBs: ${L("https://maxroll.gg/poe/pob/" + esc(D.pob.now), "yours", true)} · ${L("https://maxroll.gg/poe/pob/" + esc(D.pob.budget), "budget", true)} · ${L("https://maxroll.gg/poe/pob/" + esc(D.pob.mirror), "mirror", true)}</p></div>`; main.appendChild(n);
+  }
+
+  // ---- the Path ----
+  const LIST = (items, cls) => `<ul class="list-disc space-y-1 pl-5 marker:text-ink-4 ${cls || ""}">${items.map(i => `<li class="p2">${esc(i)}</li>`).join("")}</ul>`;
+  const OLIST = items => `<ol class="list-decimal space-y-1 pl-5 marker:text-ink-4 marker:font-medium">${items.map(i => `<li class="p2">${esc(i)}</li>`).join("")}</ol>`;
+  const pathSec = (label, body, labelCls) => body ? `<div><p class="lbl ${labelCls || ""}">${label}</p><div class="prose-w mt-1">${body}</div></div>` : "";
+  function pathLinks(step) {
+    const out = (step.links || []).map((l, i) => {
+      if (l.tab) return `<button type="button" data-goto="${esc(l.tab)}" class="btn btn-ghost btn-sm">${esc(l.label)}</button>`;
+      const u = pathUrl(l, state); return u ? tlink(u, i === 0 ? "btn-primary btn-sm" : "btn-secondary btn-sm", esc(l.label)) : "";
+    });
+    if (step.slot && !(step.links || []).some(l => l.tab === step.slot)) { const sl = slotByKey(step.slot); if (sl && sl.key !== "path") out.push(`<button type="button" data-goto="${esc(sl.key)}" class="btn btn-ghost btn-sm">${esc(sl.label)} tab</button>`); }
+    return out.join("");
+  }
+  function stepCard(x, prog) {
+    const { step, n } = x;
+    const done = stepDone(step, state);
+    const isNext = prog.next && prog.next.step.id === step.id;
+    const open = state.pathOpen && state.pathOpen[step.id] != null ? !!state.pathOpen[step.id] : isNext;
+    const li = h("li", "card");
+    const status = done ? badge(step.pob === "done" ? "Done · in your PoB" : "Done", "badge-ok") : isNext ? badge("Next", "badge-accent") : step.pob === "partial" ? badge("Partly done", "badge-info") : "";
+    li.innerHTML = `<div class="flex items-start gap-2 px-3 py-2 sm:px-4">
+      <label class="flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center" title="${done ? "Ticked — click to untick" : "Tick when done"}"><input type="checkbox" data-done="${esc(step.id)}" class="size-5 cursor-pointer rounded border-line-strong bg-lift" ${done ? "checked" : ""} aria-label="Done: ${esc(step.title)}"></label>
+      <details class="disc min-w-0 flex-1" id="p-${esc(step.id)}"${open ? " open" : ""}>
+        <summary class="min-h-11 py-1.5 pr-1"><span class="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1"><span class="num text-xs text-ink-3">${n}</span><span class="text-sm font-semibold ${done ? "text-ink-3" : "text-ink"}">${esc(step.title)}</span>${status}<span class="badge badge-muted num">${esc(step.cost)}</span></span>${DISC_CHEV}</summary>
+        <div class="space-y-4 pt-2 pb-3">
+          <p class="p2 prose-w text-ink">${esc(step.what)}</p>
+          ${pathSec("Why it works here", step.why ? `<p class="p2">${esc(step.why)}</p>` : "")}
+          ${pathSec("How", step.how && step.how.length ? OLIST(step.how) : "")}
+          ${pathSec("Watch out", step.watch && step.watch.length ? LIST(step.watch) : "", "text-warn")}
+          ${pathSec("Learn", step.learn && step.learn.length ? LIST(step.learn) : "")}
+          ${pathSec("Done when", step.check && step.check !== "—" ? `<p class="p2">${esc(step.check)}</p>` : "", "text-ok")}
+          <div class="flex flex-wrap gap-2">${pathLinks(step)}</div>
+        </div>
+      </details>
+    </div>`;
+    const det = li.querySelector("details");
+    det.addEventListener("toggle", () => { state.pathOpen = state.pathOpen || {}; state.pathOpen[step.id] = det.open; save(); });
+    li.querySelector("input[data-done]").addEventListener("change", e => { state.done = state.done || {}; state.done[step.id] = e.target.checked; save(); render(); });
+    return li;
+  }
+  function renderPath(slot) {
+    const main = $("slot");
+    const P = D.path; if (!P) return;
+    const prog = pathProgress(state);
+    const pct = prog.total ? Math.round(100 * prog.done / prog.total) : 0;
+    const head = h("section", "card"); head.setAttribute("aria-label", "Where you are");
+    head.innerHTML = `<div class="card-hd">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"><h3 class="h3">Where you are</h3><p class="meta">Updated ${esc(P.updated)} · your PoB ${esc(P.pobNow)}</p></div>
+        <p class="p3 prose-w mt-1">${esc(P.intro)}</p>
+        <div class="mt-4">
+          <div class="flex flex-wrap items-baseline justify-between gap-x-4 text-xs/5"><span class="font-medium text-ink-2"><span class="num">${prog.done}</span> of <span class="num">${prog.total}</span> steps ticked</span><span class="meta">${prog.stages.map(s => `<span class="num">${s.done}/${s.total}</span>`).join(" · ")}</span></div>
+          <div class="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-white/10" role="progressbar" aria-label="Path progress" aria-valuemin="0" aria-valuemax="${prog.total}" aria-valuenow="${prog.done}"><div class="h-full rounded-full bg-accent transition-[width] duration-300" style="width:${pct}%"></div></div>
+        </div>
+        ${prog.next ? `<div class="mt-4 flex flex-wrap items-center gap-2 rounded-md bg-accent/10 px-3 py-2.5 inset-ring inset-ring-accent/30">${badge("Next", "badge-accent")}<span class="min-w-0 flex-1 text-sm font-semibold text-ink">${esc(prog.next.step.title)}</span><span class="badge badge-muted num">${esc(prog.next.step.cost)}</span><button type="button" data-jump="${esc(prog.next.step.id)}" class="btn btn-secondary btn-sm">Jump to it</button></div>` : `<p class="mt-4 text-sm font-semibold text-ok">Everything on the path is ticked.</p>`}
+      </div>
+      <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Your PoB numbers next to fubgun's (scrolls sideways on narrow screens)"><table class="min-w-full text-sm"><caption class="sr-only">Your PoB numbers next to fubgun's</caption>
+        <thead><tr class="text-left text-xs/5 text-ink-3"><th scope="col" class="px-4 py-2 font-medium sm:px-6">PoB, 05/09</th>${P.numbers.cols.map((c, i) => `<th scope="col" class="px-3 py-2 text-right font-medium ${i === 0 ? "text-ink" : ""}">${esc(c)}</th>`).join("")}</tr></thead>
+        <tbody class="divide-y divide-line">${P.numbers.rows.map(r => `<tr><th scope="row" class="px-4 py-2 text-left font-medium whitespace-nowrap text-ink-2 sm:px-6">${esc(r[0])}</th>${r.slice(1).map((v, i) => `<td class="num px-3 py-2 text-right whitespace-nowrap ${i === 0 ? "text-ink" : "text-ink-3"}">${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      <div class="card-ft"><p class="meta prose-w">${esc(P.numbers.note)}</p></div>`;
+    main.appendChild(head);
+    const how = h("details", "disc card"); how.id = "d-path-how";
+    how.innerHTML = `<summary class="px-4 py-3 sm:px-6"><span>How the build works <span class="font-normal text-ink-3">— damage, then defence, in order</span></span>${DISC_CHEV}</summary>
+      <div class="grid grid-cols-1 gap-6 border-t border-line px-4 py-4 sm:px-6 lg:grid-cols-2">
+        <div><p class="lbl">Damage — why every DPS mod on this page exists</p>${OLIST(P.how.damage).replace('<ol class="', '<ol class="mt-2 ')}</div>
+        <div><p class="lbl">Defence — why 'smooth' is a list of specific lines</p>${OLIST(P.how.defence).replace('<ol class="', '<ol class="mt-2 ')}</div>
+      </div>`;
+    if (openDetails.has(how.id)) how.open = true;
+    how.addEventListener("toggle", () => { how.open ? openDetails.add(how.id) : openDetails.delete(how.id); });
+    main.appendChild(how);
+    const steps = pathSteps();
+    P.stages.forEach((stg, si) => {
+      const sp = prog.stages[si];
+      const sec = h("section"); sec.setAttribute("aria-label", stg.title);
+      sec.innerHTML = `<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"><h3 class="text-base font-semibold text-ink">${esc(stg.title)}</h3><p class="meta"><span class="num">${sp.done}/${sp.total}</span> · ${esc(stg.cost)}</p></div>${stg.blurb ? `<p class="p3 prose-w mt-1">${esc(stg.blurb)}</p>` : ""}`;
+      const ol = h("ol", "mt-3 space-y-3"); ol.setAttribute("aria-label", `${stg.title} steps`);
+      steps.filter(x => x.stage === stg).forEach(x => ol.appendChild(stepCard(x, prog)));
+      sec.appendChild(ol); main.appendChild(sec);
+    });
+    if (P.glossary && P.glossary.length) {
+      const g = h("details", "disc card"); g.id = "d-path-glossary";
+      g.innerHTML = `<summary class="px-4 py-3 sm:px-6"><span>Words used above <span class="font-normal text-ink-3">(${P.glossary.length})</span></span>${DISC_CHEV}</summary>
+        <dl class="grid grid-cols-1 gap-x-8 gap-y-3 border-t border-line px-4 py-4 sm:px-6 lg:grid-cols-2">${P.glossary.map(([t, d]) => `<div><dt class="text-sm font-semibold text-ink">${esc(t)}</dt><dd class="p3 mt-0.5">${esc(d)}</dd></div>`).join("")}</dl>`;
+      if (openDetails.has(g.id)) g.open = true;
+      g.addEventListener("toggle", () => { g.open ? openDetails.add(g.id) : openDetails.delete(g.id); });
+      main.appendChild(g);
+    }
+    main.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => go(b.dataset.goto)));
+    main.querySelectorAll("[data-jump]").forEach(b => b.addEventListener("click", () => { const d = $("p-" + b.dataset.jump); if (!d) return; d.open = true; d.scrollIntoView({ block: "start", behavior: "smooth" }); const sm = d.querySelector("summary"); if (sm) sm.focus({ preventScroll: true }); }));
   }
 
   function renderSlot() {
@@ -580,7 +695,8 @@ if (typeof document !== "undefined") {
     const main = $("slot"); main.innerHTML = "";
     $("slot-title").textContent = slot.label;
     $("mob-title").textContent = slot.label;
-    const sub = $("slot-sub"); if (sub) sub.textContent = slot.shopTab || slot.gemsTab || slot.setupTab ? "" : `${isMirror(state) ? "Mirror" : "Budget"} spec · ${isMirror(state) ? D.pob.mirror : D.pob.budget}`;
+    const sub = $("slot-sub"); if (sub) sub.textContent = slot.shopTab || slot.gemsTab || slot.setupTab ? "" : slot.pathTab ? `Your PoB ${D.pob.now} → fubgun ${D.pob.budget}` : `${isMirror(state) ? "Mirror" : "Budget"} spec · ${isMirror(state) ? D.pob.mirror : D.pob.budget}`;
+    if (slot.pathTab) { renderPath(slot); return; }
     if (slot.gemsTab) { renderGems(slot); return; }
     if (slot.shopTab) { renderShop(slot); return; }
     if (slot.setupTab) { renderSetup(slot); return; }
@@ -626,19 +742,21 @@ if (typeof document !== "undefined") {
   // Re-rendering replaces the slot DOM; keep focus on the weight input being edited.
   function render() {
     const ae = document.activeElement;
-    const keep = ae && ae.dataset && ae.dataset.wkey ? { wkey: ae.dataset.wkey, stat: ae.dataset.stat } : (ae && ae.id && /^r-/.test(ae.id) ? { id: ae.id } : null);
+    const keep = ae && ae.dataset && ae.dataset.wkey ? { wkey: ae.dataset.wkey, stat: ae.dataset.stat } : ae && ae.dataset && ae.dataset.done ? { done: ae.dataset.done } : (ae && ae.id && /^r-/.test(ae.id) ? { id: ae.id } : null);
     renderPhase(); renderNav(); renderLoadout(); renderSlot();
     $("hdr-level").textContent = state.level;
     $("hdr-budget").textContent = fmtBudget(state);
     $("hdr-league").textContent = state.league;
     const sum = $("settings-sum"); if (sum) sum.textContent = settingsSummary();
-    if (keep) { const el = keep.id ? $(keep.id) : document.querySelector(`input[data-wkey="${CSS.escape(keep.wkey)}"][data-stat="${CSS.escape(keep.stat)}"]`); if (el) { const d = el.closest("details"); if (d) d.open = true; el.focus({ preventScroll: true }); } }
+    if (keep) { const el = keep.id ? $(keep.id) : keep.done ? document.querySelector(`input[data-done="${CSS.escape(keep.done)}"]`) : document.querySelector(`input[data-wkey="${CSS.escape(keep.wkey)}"][data-stat="${CSS.escape(keep.stat)}"]`); if (el) { const d = el.closest("details"); if (d && !keep.done) d.open = true; el.focus({ preventScroll: true }); } }
     hydrateLinks();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     const hash = location.hash.replace("#", ""); if (hash && slotByKey(hash)) state.slot = hash;
-    if (!slotByKey(state.slot)) state.slot = "shop";
+    else if (!state.pathSeen && slotByKey("path")) { state.slot = "path"; }
+    state.pathSeen = true;
+    if (!slotByKey(state.slot)) state.slot = "path";
     bindSettings(); render();
     window.addEventListener("hashchange", () => { const k = location.hash.replace("#", ""); if (slotByKey(k) && k !== state.slot) { state.slot = k; save(); render(); } });
   });
