@@ -56,5 +56,13 @@ ok(A.rareQuery(boots, Object.assign({}, A.DEFAULTS, { msMin: 30 })).query.stats.
 { const zlib = require("zlib"); const u = A.rareUrl(D.slots.find(s => s.key === "helmet"), A.DEFAULTS); const h = u.split("/").pop();
   const dec = JSON.parse(zlib.gunzipSync(Buffer.from(h.replace(/-/g, "+").replace(/_/g, "/"), "base64")).toString());
   ok(/^https:\/\/www\.pathofexile\.com\/trade\/search\/Allflame\/H4sI/.test(u), "hash url shape"); ok(dec.status && dec.stats && !dec.query, "hash holds the bare query"); }
+// gem links never offer a level/quality the PoB already has
+{ const ek = D.gems.find(g => g.name === "Ethereal Knives"); const L = A.gemLinks(ek, A.DEFAULTS); ok(A.haveOf(ek).lvl === 21 && A.haveOf(ek).q === 20, "haveOf parses 21/20");
+  ok(!L.some(l => l.spec.lvlMin <= 21 && (l.spec.qMin || 0) <= 20), "EK: no link at or below 21/20"); ok(L.some(l => l.spec.qMin === 23), "EK: 21/23 still offered");
+  const oi = D.gems.find(g => g.name === "Overloaded Intensity Support"); ok(A.gemLinks(oi, A.DEFAULTS).length === 0 && A.gemLinksAll(oi, A.DEFAULTS).length > 0, "owned 4/20 exceptional gem: nothing left to buy");
+  const hop = D.gems.find(g => g.name === "Herald of Purity"); ok(A.gemLinks(hop, A.DEFAULTS).some(l => l.spec.lvlMin === 21), "HoP 20/20 owned: 21 offered"); }
+// per-card min sum
+{ const st = Object.assign({}, A.DEFAULTS, { minSums: { "jewel:abyss": 55 } }); const j = D.slots.find(s => s.key === "jewel");
+  ok(A.rareQuery(j, st, "abyss").query.stats[0].value.min === 55 && A.rareQuery(j, st).query.stats[0].value.min === 1, "min sum is per card"); }
 console.log(fails ? `${fails} failure(s)` : "all checks passed");
 process.exit(fails ? 1 : 0);
