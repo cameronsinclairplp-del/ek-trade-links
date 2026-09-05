@@ -9,7 +9,7 @@ const out = process.argv[2] || path.join(root, '_qa');
 fs.mkdirSync(out, { recursive: true });
 const exe = fs.readdirSync('/opt/pw-browsers').filter(d => d.startsWith('chromium-')).map(d => `/opt/pw-browsers/${d}/chrome-linux/chrome`).find(p => fs.existsSync(p));
 const axeSrc = fs.readFileSync(path.join(root, 'node_modules/axe-core/axe.min.js'), 'utf8');
-const tabs = (process.env.TABS || 'shop,setup,staff,helmet,boots,jewel,gems,flask').split(',');
+const tabs = (process.env.TABS || 'path,shop,setup,staff,helmet,boots,jewel,gems,flask').split(',');
 const widths = (process.env.WIDTHS || '393,768,1024,1440').split(',').map(Number);
 const browser = await chromium.launch({ executablePath: exe });
 const report = [];
