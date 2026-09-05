@@ -66,8 +66,8 @@
             <button id="settings-toggle" type="button" class="btn btn-ghost lg:hidden" aria-expanded="false" aria-controls="settings-grid">Edit</button>
           </div>
         </div>
-        <div id="settings-grid" class="hidden grid-cols-2 gap-4 px-4 py-4 sm:grid-cols-4 sm:px-6 lg:grid xl:grid-cols-12">
-          <div class="col-span-2 xl:col-span-3">
+        <div id="settings-grid" class="hidden grid-cols-2 gap-4 px-4 py-4 sm:grid-cols-4 sm:px-6 lg:grid lg:grid-cols-6">
+          <div class="col-span-2">
             <label for="s-level" class="lbl">Level</label>
             <div class="mt-1 flex">
               <button id="s-level-dn" type="button" aria-label="Level down" class="btn btn-secondary min-w-11 rounded-r-none">−</button>
@@ -75,7 +75,7 @@
               <button id="s-level-up" type="button" aria-label="Level up" class="btn btn-secondary min-w-11 rounded-l-none">+</button>
             </div>
           </div>
-          <div class="col-span-2 xl:col-span-3">
+          <div class="col-span-2">
             <label for="s-budget" class="lbl">Max price</label>
             <div class="mt-1 flex">
               <input id="s-budget" type="number" min="0" step="1" inputmode="decimal" class="field num rounded-r-none" />
@@ -93,14 +93,14 @@
             <label for="s-league" class="lbl">League</label>
             <input id="s-league" type="text" class="field mt-1" />
           </div>
-          <div class="xl:col-span-2">
+          <div class="lg:col-span-2">
             <label for="s-status" class="lbl">Sellers</label>
             <div class="mt-1 grid grid-cols-1">
               <select id="s-status" class="select"><option value="securable">Buyout only</option><option value="online">Online</option><option value="any">Any</option></select>
               <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="pointer-events-none col-start-1 row-start-1 mr-3 size-4 self-center justify-self-end text-ink-3"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
             </div>
           </div>
-          <div>
+          <div class="lg:col-span-2">
             <label for="s-roll" class="lbl">Top roll ≥</label>
             <div class="mt-1 grid grid-cols-1">
               <select id="s-roll" class="select"><option value="0.7">70%</option><option value="0.85">85%</option><option value="0.95">95%</option><option value="1">Max</option></select>
