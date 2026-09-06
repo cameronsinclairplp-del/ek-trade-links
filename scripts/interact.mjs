@@ -138,6 +138,28 @@ const url = 'file://' + path.join(root, 'index.html');
   ok(errs.length === 0, `no page errors on the PoB flow (${errs.join('; ')})`);
   await page.close();
 }
+// --- Path: the gloves crafting guide opens inside the step, its links hydrate, the white-base link carries no weight group
+{
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await page.route(/^https?:\/\//, r => r.abort());
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  await page.goto(url + '#path'); await page.waitForTimeout(300);
+  await page.evaluate(() => { document.getElementById('p-gloves').open = true; document.getElementById('g-gloves').open = true; });
+  await page.waitForTimeout(300);
+  const gunzip = (await import('node:zlib')).gunzipSync;
+  const dec = u => JSON.parse(gunzip(Buffer.from(u.split('/').pop().replace(/-/g, '+').replace(/_/g, '/'), 'base64')).toString());
+  const g1 = await page.evaluate(() => ({ steps: document.querySelectorAll('#g-gloves ol[aria-label] > li').length, costs: document.querySelectorAll('#g-gloves dl > div').length, links: [...document.querySelectorAll('#g-gloves a[href^="https"]')].map(a => a.textContent.trim().replace(/ \(trade site.*$/, '') + '|' + a.href), pending: document.querySelectorAll('#g-gloves a.is-pending').length, verdict: /Bad news first/.test(document.querySelector('#g-gloves').textContent) }));
+  ok(g1.steps === 7 && g1.costs >= 10 && g1.verdict, `gloves guide: ${g1.steps} steps, ${g1.costs} prices, verdict shown`);
+  const white = g1.links.find(l => l.startsWith('White Warlock'));
+  const wq = white && dec(white.split('|')[1]);
+  ok(g1.pending === 0 && g1.links.length === 5 && wq && wq.stats.length === 0 && wq.filters.type_filters.filters.rarity.option === 'normal', `guide links hydrated (${g1.links.length}); white-base search is plain (${wq ? wq.stats.length : '?'} stat groups)`);
+  const donor = g1.links.find(l => l.startsWith('Clean donor')); const dq = donor && dec(donor.split('|')[1]);
+  ok(dq && dq.stats[0].type === 'weight2' && dq.stats.some(gp => gp.filters.some(f => f.id === 'pseudo.pseudo_number_of_suffix_mods')), 'clean-donor link: weighted + one-suffix lock');
+  await page.click('[data-phase="mirror"]'); await page.waitForTimeout(200); await page.click('[data-phase="budget"]'); await page.waitForTimeout(200);
+  ok(await page.evaluate(() => document.getElementById('g-gloves').open === true && document.getElementById('p-gloves').open === true), 'guide stays open across a re-render');
+  ok(errs.length === 0, `no page errors on the guide (${errs.join('; ')})`);
+  await page.close();
+}
 // --- Maps: four regex cards with copy, tier filter on the pool tables, 8-mod buy links carry the ban list
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, permissions: ['clipboard-read', 'clipboard-write'] });

@@ -115,6 +115,19 @@ ok(D.pob.now === "glis80qp" && A.DEFAULTS.level === 97, "PoB id and level update
   const blk = A.rawQuery(jewel.rare.extra[2].query, A.DEFAULTS, jewel).query; ok(blk.stats[0].filters.some(f => f.id === D.S.staffBlock.id), "block-jewel extra uses the jewel weights");
   for (const s of D.slots) if (s.rare) for (const x of s.rare.extra || []) { const qq = A.rawQuery(x.query, A.DEFAULTS, s, x.wgroup).query; ok(qq.stats[0].type === "weight2" && qq.stats[0].filters.length > 0 && JSON.stringify(qq).length < 8000, `${s.key} extra '${x.label.slice(0, 30)}' is weighted`); }
   ok(A.rawQuery({ stats: [] }, A.DEFAULTS).query.stats.length === 0, "raw query without a slot stays unweighted"); }
+// Gloves crafting guide: complete steps, links resolve, the white-base search carries no weight group, the fractured search excludes corrupted
+{
+  const step = A.pathSteps().map(x => x.step).find(s => s.id === "gloves"); const g = step && step.guide;
+  ok(g && g.title && g.verdict && g.steps.length >= 6 && g.costs.length >= 10 && g.traps.length >= 3, "guide: block present");
+  for (const s of (g ? g.steps : [])) ok(s.title && Array.isArray(s.do) && s.do.length && (!s.miss || Array.isArray(s.miss)), `guide: step "${s.title}" incomplete`);
+  for (const l of (g ? g.links : [])) ok(A.pathUrl(l, A.DEFAULTS) || l.tab, `guide link ${l.label}: no url`);
+  const gl = D.slots.find(s => s.key === "gloves"); ok(gl.rare.extra.length === 6, "gloves: six searches");
+  const white = A.rawQuery(gl.rare.extra[5].query, A.DEFAULTS, gl.rare.extra[5].plain ? null : gl).query;
+  ok(gl.rare.extra[5].plain && !white.stats.length && white.filters.type_filters.filters.rarity.option === "normal", "gloves: white-base search is plain (no weight group)");
+  const fr = gl.rare.extra[1].query; ok(fr.filters.misc_filters.filters.corrupted.option === "false" && fr.filters.misc_filters.filters.ilvl.min === 84, "gloves: fractured-base search excludes corrupted, ilvl 84+");
+  const clean = gl.rare.extra[4].query; ok(clean.stats[0].filters.some(f => f.id === "pseudo.pseudo_number_of_suffix_mods" && f.value.max === 1) && clean.filters.misc_filters.filters.fractured_item.option === "false", "gloves: clean-donor search = one suffix, unfractured");
+  ok(A.shopUrl({ link: { extra: ["gloves", 5] } }, A.DEFAULTS).startsWith("https://"), "gloves: plain extra resolves from a Path/shop link");
+}
 // Maps: every mod tiered with a reason, pools sized, regexes poe.re-shaped and under 250, and each regex bans exactly its list
 {
   const M = D.maps; ok(M && M.mods.length === 122 && M.profiles.length === 4 && M.buy.length >= 4, "maps: block present");
