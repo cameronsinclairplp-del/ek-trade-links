@@ -1,3 +1,40 @@
+## CAMERON NOW (7wsk40qv, decoded 06/09/2026 — level 98)
+Changes since glis80qp (05/09): level 97 → 98 (+1 point, spent on small jewel socket 9797); helmet Mind Cage → **Lich's Circlet "Rage Cowl"** (478 ES: 133% + 46 flat, +36 Int, 48% fire, crafted +20% fire and cold, implicits 7% reservation efficiency + 28% spell crit; the Mind Cage's 9% cast speed implicit is gone → 8.84 → 8.53 casts/s, but crit is now 100% / 520% so DPS still rose 37.3M → 38.4M); **Hypnotic Eye #1 "Grim Leer"** into socket 49080 (50% avoid shock, fractured 1–41 added spell lightning while two-handed, 47% avoid poison, +26 mana — replaces Enthralling Stare; ailment immunity intact with Whispering Sphere's 50% + Stormshroud); **block jewel #1 "Plague Scar"** into 59585 (fractured +3% attack block with a staff, +15% spell crit multi, 8% max ES, +13 Int); **Immutable Force** into the new socket 9797 (981% stun and block recovery); **Rumi's Concoction 12% / 6%** (was 8% / 6%); Herald of Purity 21/0, Herald of Ice 21/0, Herald of Thunder 21/23 (were 20/20). Everything else identical: staff, chest, gloves, boots, amulet, rings, belt, other flasks, clusters, masteries, config (no config diff), pantheon Lunaris + Yugul.
+
+Numbers (PoB, fubgun's config, flasks on): ES 4,738 → 5,583 · EHP 108k → 121k · max hit phys 7,715 → 8,948, fire 27k → 30k, cold 45k → 50k, lightning 37k → 42k · attack block 30% → 37% (Rumi 12 + jewel 3), spell block 75% · armour 3,585 · res 75/80/76 with fire +31, cold +79, lightning +41 over cap · chaos res 75 → 35 (irrelevant: CI) · Int 52 → 98 · mana unreserved 83, regen 111.8/s vs 130/s EK cost · ES regen 410/s + leech 964/s.
+
+Tree: 132 nodes (131 + 9797). Still not taken from fubgun's budget tree: Deep Wisdom 27929, Steeped in the Profane 53652, Tolerance 10511. About 3 points unspent (not readable from the XML — check the PoB header). Sockets now: 2311 Sublime Vision · 7960 Dragon Creed (large) · 9408 Vivid Ornament (medium) · 9797 Immutable Force · 12613 Apex Mode · 13170 Chimeric Stone (medium) · 21984 Damnation Hope (large) · 26196 Impossible Escape · 29712 Plague Curio (medium) · 41263 Elegant Hubris (seed 30180) · 44169 Stormshroud · 49080 Grim Leer (Eye #1) · 55190 Dragon Vessel (large) · 59585 Plague Scar (block #1) · 61419 Whispering Sphere · 64583 Kraken Shard (medium).
+
+What is still open from Path stage 1: gloves (Warlock, fractured temple mod), Eye #2 into the gloves' abyssal socket then block jewel #2 into 61419, Warlock Boots, staff base. Full XML: reference/pob-7wsk40qv.xml.
+
+### Helmet: Rage Cowl (RARE, Lich's Circlet) — new 06/09
+  - Searing Exarch Item · Eater of Worlds Item · Intangibility 18%
+  _Item Level: 84_ · _Quality: 20_ · _Sockets: W-R-W-R_
+  - 7% increased Mana Reservation Efficiency of Skills (implicit)
+  - 28% increased Spell Critical Strike Chance (implicit)
+  - +36 to Intelligence
+  - +46 to maximum Energy Shield
+  - 133% increased Energy Shield
+  - +48% to Fire Resistance
+  - 15% increased Stun and Block Recovery
+  - {crafted}+20% to Fire and Cold Resistances
+### Jewel @49080: Grim Leer (RARE, Hypnotic Eye Jewel) — new 06/09
+  _Item Level: 84_
+  - +26 to maximum Mana
+  - 50% chance to Avoid being Shocked
+  - 47% chance to Avoid being Poisoned
+  - {fractured}1 to 41 Added Spell Lightning Damage while wielding a Two Handed Weapon
+### Jewel @59585: Plague Scar (RARE, Cobalt Jewel) — new 06/09
+  _Item Level: 83_
+  - +13 to Intelligence
+  - +15% to Critical Strike Multiplier for Spell Damage
+  - 8% increased maximum Energy Shield
+  - {fractured}+3% Chance to Block Attack Damage while wielding a Staff
+### Jewel @9797: Immutable Force (UNIQUE, Crimson Jewel) — new 06/09
+  - 981% increased Stun and Block Recovery
+### Flask 5: Rumi's Concoction — new roll 06/09
+  - +12% Chance to Block Attack Damage during Effect · +6% Chance to Block Spell Damage during Effect · {crafted}Used when Charges reach full · Quality 20
+
 ## CAMERON NOW (glis80qp, decoded 05/09/2026 22:45 — items identical to dqeik0qu below)
 Since ipgiz0qx (same day): all five flasks ticked; 17 Tattoos of the Arohongui Shaman applied (the same 17 nodes as fubgun) → Int 210 → 52, DPS 26.0M → 37.2M, EHP 81k → 108k, armour 3,555, attack block 30%; five Intelligence nodes still plain (37671, 32210, 8948, 48778, 21678); Dark Arts kept on purpose — it sits in the Elegant Hubris radius and becomes a damage notable; Elegant Hubris 30180 (Caspiro) grants Supreme Ostentation = no attribute requirements, so the Dex/Int floors below are moot; PoB header shows 120/123 points (3 unspent).
 
