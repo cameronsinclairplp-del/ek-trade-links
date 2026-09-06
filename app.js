@@ -330,7 +330,7 @@ function shopUrl(item, st) {
   }
   if (l.rare) { const slot = D.slots.find(x => x.key === l.rare); return rareUrl(slot, Object.assign({}, st2, { base: "auto", minSum: st2.minSum || 0 })); }
   if (l.raw) return rawUrl(l.raw, st2);
-  if (l.extra) { const slot = D.slots.find(x => x.key === l.extra[0]); const ex = (slot.rare.extra || [])[l.extra[1]]; return ex ? rawUrl(ex.query, st2, slot, ex.wgroup) : null; }
+  if (l.extra) { const slot = D.slots.find(x => x.key === l.extra[0]); const ex = (slot.rare.extra || [])[l.extra[1]]; return ex ? rawUrl(ex.query, st2, ex.plain ? null : slot, ex.wgroup) : null; }
   if (l.cluster) { const slot = D.slots.find(x => x.key === "jewel"); const c = slot.clusters[l.cluster]; return c ? clusterUrl(c, st2) : null; }
   if (l.gem) return gemUrl(l.gem, st2);
   return null;
@@ -611,7 +611,7 @@ if (typeof document !== "undefined") {
     const card = h("section", "card"); card.setAttribute("aria-label", "Craft starts and exact searches");
     const src = weightSource(state, wkey(slot, state));
     card.innerHTML = `<div class="card-hd"><h3 class="h3">Craft starts and exact searches</h3><p class="p3 prose-w mt-1">The locks that make the item (AND / count groups) plus this slot's weighted sum — ${src === "pob" ? "PoB's weights" : "the hand weights above"} — with no floor, so the locks filter and the sum ranks. Click <span class="font-semibold text-ink-2">Sum:</span> on a result to sort best-first. Price cap and seller status from Settings still apply.</p></div>
-      <ul role="list" class="rows">${v.extra.map(x => `<li class="row"><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-ink">${esc(x.label)}</p><p class="p3 prose-w mt-1">${esc(x.why)}</p></div><div class="flex shrink-0 gap-2">${tlink(rawUrl(x.query, state, slot, x.wgroup), "btn-secondary", "Open weighted")}</div></li>`).join("")}</ul>`;
+      <ul role="list" class="rows">${v.extra.map(x => `<li class="row"><div class="min-w-0 flex-1"><p class="text-sm font-semibold text-ink">${esc(x.label)}</p><p class="p3 prose-w mt-1">${esc(x.why)}</p></div><div class="flex shrink-0 gap-2">${tlink(rawUrl(x.query, state, x.plain ? null : slot, x.wgroup), "btn-secondary", x.plain ? "Open" : "Open weighted")}</div></li>`).join("")}</ul>`;
     return card;
   }
 
@@ -743,6 +743,28 @@ if (typeof document !== "undefined") {
     if (step.slot && !(step.links || []).some(l => l.tab === step.slot)) { const sl = slotByKey(step.slot); if (sl && sl.key !== "path") out.push(`<button type="button" data-goto="${esc(sl.key)}" class="btn btn-ghost btn-sm">${esc(sl.label)} tab</button>`); }
     return out.join("");
   }
+  // A crafting walkthrough attached to a Path step: verdict, price list, numbered steps (do / if it misses / why), traps, links.
+  function guideBlock(step) {
+    const g = step.guide;
+    const stepsHtml = g.steps.map((s, i) => `<li class="rounded-md bg-lift px-3 py-3 inset-ring inset-ring-line">
+        <p class="flex flex-wrap items-center gap-x-2 gap-y-1"><span class="num flex size-6 shrink-0 items-center justify-center rounded-md bg-accent/15 text-xs font-semibold text-accent-text" aria-hidden="true">${i + 1}</span><span class="sr-only">Step ${i + 1}. </span><span class="text-sm font-semibold text-ink">${esc(s.title)}</span>${s.cost ? `<span class="badge badge-muted num">${esc(s.cost)}</span>` : ""}</p>
+        <div class="mt-2 space-y-3">
+          ${s.do && s.do.length ? OLIST(s.do) : ""}
+          ${s.miss && s.miss.length ? `<div><p class="lbl text-warn">If it misses</p>${LIST(s.miss, "mt-1")}</div>` : ""}
+          ${s.why ? `<p class="p3 prose-w"><span class="font-medium text-ink-2">Why:</span> ${esc(s.why)}</p>` : ""}
+        </div>
+      </li>`).join("");
+    return `<details class="disc rounded-md bg-black/20 px-3 inset-ring inset-ring-line" id="g-${esc(step.id)}">
+      <summary class="py-2.5"><span>${esc(g.title)}</span>${DISC_CHEV}</summary>
+      <div class="space-y-4 pb-4">
+        <div class="rounded-md bg-warn/10 px-3 py-2.5 text-sm/6 text-ink-2"><span class="font-semibold text-warn">Verdict.</span> ${esc(g.verdict)}</div>
+        ${g.costs && g.costs.length ? `<div><p class="lbl">Prices, ${esc(D.maps ? D.maps.updated : "")} (poe.ninja + trade)</p><dl class="mt-1 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">${g.costs.map(([k, v]) => `<div class="flex justify-between gap-3 border-b border-line py-1 text-sm/6"><dt class="text-ink-2">${esc(k)}</dt><dd class="num shrink-0 text-right text-ink">${esc(v)}</dd></div>`).join("")}</dl></div>` : ""}
+        <ol class="space-y-3" aria-label="${esc(g.title)} steps">${stepsHtml}</ol>
+        ${g.traps && g.traps.length ? `<div><p class="lbl text-warn">Traps</p>${LIST(g.traps, "mt-1")}</div>` : ""}
+        ${g.links && g.links.length ? `<div class="flex flex-wrap gap-2">${pathLinks({ links: g.links })}</div>` : ""}
+      </div>
+    </details>`;
+  }
   function stepCard(x, prog) {
     const { step, n } = x;
     const done = stepDone(step, state);
@@ -762,11 +784,13 @@ if (typeof document !== "undefined") {
           ${pathSec("Learn", step.learn && step.learn.length ? LIST(step.learn) : "")}
           ${pathSec("Done when", step.check && step.check !== "—" ? `<p class="p2">${esc(step.check)}</p>` : "", "text-ok")}
           <div class="flex flex-wrap gap-2">${pathLinks(step)}</div>
+          ${step.guide ? guideBlock(step) : ""}
         </div>
       </details>
     </div>`;
     const det = li.querySelector("details");
     det.addEventListener("toggle", () => { state.pathOpen = state.pathOpen || {}; state.pathOpen[step.id] = det.open; save(); });
+    const gd = li.querySelector("details[id^='g-']"); if (gd) { if (openDetails.has(gd.id)) gd.open = true; gd.addEventListener("toggle", () => { gd.open ? openDetails.add(gd.id) : openDetails.delete(gd.id); }); }
     li.querySelector("input[data-done]").addEventListener("change", e => { state.done = state.done || {}; state.done[step.id] = e.target.checked; save(); render(); });
     return li;
   }
