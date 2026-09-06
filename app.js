@@ -4,7 +4,7 @@ const S = D.S;
 
 // ---------- state ----------
 const DEFAULTS = {
-  level: 97, budget: 100, unit: "div", divC: D.divineChaos, league: D.league, status: "securable",
+  level: 98, budget: 100, unit: "div", divC: D.divineChaos, league: D.league, status: "securable",
   rollQ: 0.85, corrupted: "any", slot: "path", minSum: 0, minSums: {}, base: "auto", links: "auto", msMin: "auto",
   weights: {}, phase: "budget", setup: "budget", done: {}, pathOpen: {}, pob: {}, wsrc: {},
 };
@@ -810,7 +810,7 @@ if (typeof document !== "undefined") {
         ${prog.next ? `<div class="mt-4 flex flex-wrap items-center gap-2 rounded-md bg-accent/10 px-3 py-2.5 inset-ring inset-ring-accent/30">${badge("Next", "badge-accent")}<span class="min-w-0 flex-1 text-sm font-semibold text-ink">${esc(prog.next.step.title)}</span><span class="badge badge-muted num">${esc(prog.next.step.cost)}</span><button type="button" data-jump="${esc(prog.next.step.id)}" class="btn btn-secondary btn-sm">Jump to it</button></div>` : `<p class="mt-4 text-sm font-semibold text-ok">Everything on the path is ticked.</p>`}
       </div>
       <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Your PoB numbers next to fubgun's (scrolls sideways on narrow screens)"><table class="min-w-full text-sm"><caption class="sr-only">Your PoB numbers next to fubgun's</caption>
-        <thead><tr class="text-left text-xs/5 text-ink-3"><th scope="col" class="px-4 py-2 font-medium sm:px-6">PoB, 05/09</th>${P.numbers.cols.map((c, i) => `<th scope="col" class="px-3 py-2 text-right font-medium ${i === 0 ? "text-ink" : ""}">${esc(c)}</th>`).join("")}</tr></thead>
+        <thead><tr class="text-left text-xs/5 text-ink-3"><th scope="col" class="px-4 py-2 font-medium sm:px-6">PoB, ${esc(P.updated)}</th>${P.numbers.cols.map((c, i) => `<th scope="col" class="px-3 py-2 text-right font-medium ${i === 0 ? "text-ink" : ""}">${esc(c)}</th>`).join("")}</tr></thead>
         <tbody class="divide-y divide-line">${P.numbers.rows.map(r => `<tr><th scope="row" class="px-4 py-2 text-left font-medium whitespace-nowrap text-ink-2 sm:px-6">${esc(r[0])}</th>${r.slice(1).map((v, i) => `<td class="num px-3 py-2 text-right whitespace-nowrap ${i === 0 ? "text-ink" : "text-ink-3"}">${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
       <div class="card-ft"><p class="meta prose-w">${esc(P.numbers.note)}</p></div>`;
     main.appendChild(head);

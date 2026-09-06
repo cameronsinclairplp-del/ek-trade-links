@@ -1,6 +1,6 @@
 # EK Elementalist · Trade Links
 
-Budget-aware Path of Exile trade links for an Ethereal Knives herald-stacking CI Elementalist (Fornaxx, Allflame), walking the character to fubgun's two PoBs: **budget** ([t0ezm0qf](https://maxroll.gg/poe/pob/t0ezm0qf)) and **mirror** ([2peil0qa](https://maxroll.gg/poe/pob/2peil0qa)). Phase toggle switches the spec; the character is [glis80qp](https://maxroll.gg/poe/pob/glis80qp) (L97, 05/09; the 03/09 starting point was [dqeik0qu](https://maxroll.gg/poe/pob/dqeik0qu)).
+Budget-aware Path of Exile trade links for an Ethereal Knives herald-stacking CI Elementalist (Fornaxx, Allflame), walking the character to fubgun's two PoBs: **budget** ([t0ezm0qf](https://maxroll.gg/poe/pob/t0ezm0qf)) and **mirror** ([2peil0qa](https://maxroll.gg/poe/pob/2peil0qa)). Phase toggle switches the spec; the character is [7wsk40qv](https://maxroll.gg/poe/pob/7wsk40qv) (L98, 06/09; glis80qp on 05/09, the 03/09 starting point was [dqeik0qu](https://maxroll.gg/poe/pob/dqeik0qu)).
 
 **Path** tab: the upgrade sequence, item by item, in buying order — for each step what to buy or do, why it works on this build (the mod mechanics), how (buy or fubgun's craft recipe), what it costs elsewhere (resists, attribute floors, ailment immunity), and what done looks like; a tick per step saved in the browser, a PoB numbers table next to fubgun's, an explainer of the damage and defence chains, and a glossary. Tattoos (17× Arohongui Shaman on fubgun's tree) and the two 50%-avoid-shock abyss jewels that carry the ailment immunity are called out because a plain item diff misses both.
 
@@ -21,7 +21,7 @@ Per slot: what you have vs. fubgun's target, a **Weighted Sum v2** rare search w
 - `scripts/test.js` — data + query sanity checks (`npm test`)
 - `scripts/qa.mjs` — renders every tab at 320/393/768/1024/1440, runs axe-core WCAG 2.1 A/AA, checks overflow, console errors, unhydrated links, touch targets (`npm run qa`)
 - `scripts/interact.mjs` — behavioural checks: keyboard path, navigation, phase toggle, weight editing, hover without layout shift, the Path (default landing, tick persistence, jump), PoB weight import, the Maps tab (copy, tier filter, ban lists in the buy links), reduced motion
-- `reference/` — fubgun's craft notes (verbatim), the decoded item dumps, the raw PoB XML (dqeik0qu, ipgiz0qx, glis80qp, t0ezm0qf, 2peil0qa), the decode script, poe.re's map-mod data (`poere-map-mods.json`) and the map tiering notes (`map-mods.md`)
+- `reference/` — fubgun's craft notes (verbatim), the decoded item dumps, the raw PoB XML (dqeik0qu, ipgiz0qx, glis80qp, 7wsk40qv, t0ezm0qf, 2peil0qa), the decode script, poe.re's map-mod data (`poere-map-mods.json`) and the map tiering notes (`map-mods.md`)
 
 ## Design
 Dark-only luminance system (near-black canvas, three lifted surfaces, four text tiers, one indigo accent); one meaning per badge colour (green = have / yes / free to run, amber = craft / if cheap / danger, blue = option / watch, indigo = buy now, pink = variant locked / map reward, red = never); every control 40px tall on desktop and 44px on phones; Inter with `cv01/ss03`, tabular numbers on prices and levels. axe clean at five widths, zero console errors, reduced motion respected.

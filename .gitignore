@@ -3,3 +3,4 @@ _to_delete/
 node_modules/
 package-lock.json
 HANDOFF.md
+_qa/
