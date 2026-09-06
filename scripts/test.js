@@ -60,7 +60,7 @@ ok(A.rareQuery(boots, Object.assign({}, A.DEFAULTS, { msMin: 30 })).query.stats.
 { const ek = D.gems.find(g => g.name === "Ethereal Knives"); const L = A.gemLinks(ek, A.DEFAULTS); ok(A.haveOf(ek).lvl === 21 && A.haveOf(ek).q === 20, "haveOf parses 21/20");
   ok(!L.some(l => l.spec.lvlMin <= 21 && (l.spec.qMin || 0) <= 20), "EK: no link at or below 21/20"); ok(L.some(l => l.spec.qMin === 23), "EK: 21/23 still offered");
   const oi = D.gems.find(g => g.name === "Overloaded Intensity Support"); ok(A.gemLinks(oi, A.DEFAULTS).length === 0 && A.gemLinksAll(oi, A.DEFAULTS).length > 0, "owned 4/20 exceptional gem: nothing left to buy");
-  const hop = D.gems.find(g => g.name === "Herald of Purity"); ok(A.gemLinks(hop, A.DEFAULTS).some(l => l.spec.lvlMin === 21), "HoP 20/20 owned: 21 offered"); }
+  const hop = D.gems.find(g => g.name === "Herald of Purity"); ok(!A.gemLinks(hop, A.DEFAULTS).some(l => l.spec.lvlMin === 21 && !(l.spec.qMin > 0)) && A.gemLinksAll(hop, A.DEFAULTS).some(l => l.spec.lvlMin === 21), "HoP 21/0 owned: the plain 21 link is no longer offered"); }
 // per-card min sum
 { const st = Object.assign({}, A.DEFAULTS, { minSums: { "jewel:abyss": 55 } }); const j = D.slots.find(s => s.key === "jewel");
   ok(A.rareQuery(j, st, "abyss").query.stats[0].value.min === 55 && A.rareQuery(j, st).query.stats[0].value.min === 1, "min sum is per card"); }
@@ -92,7 +92,8 @@ ok(A.rareQuery(boots, Object.assign({}, A.DEFAULTS, { msMin: 30 })).query.stats.
   const hq = A.rareQuery(D.slots.find(s => s.key === "helmet"), A.DEFAULTS).query; ok(!hq.stats.some(g => g.type === "and" && g.filters.some(f => f.id === D.S.avoidShock.id)), "avoid-shock must does not leak into other slots"); }
 // shop: done flag, numbering, tattoos first block
 ok(D.shop.every((it, i) => it.n === i + 1), "shop numbered 1..n"); ok(D.shop[0].done === true && /Tattoo/.test(D.shop[1].item), "shop: config done, tattoos second");
-ok(D.pob.now === "glis80qp" && A.DEFAULTS.level === 97, "PoB id and level updated");
+ok(D.pob.now === "7wsk40qv" && A.DEFAULTS.level === 98 && D.path.pobNow === "7wsk40qv" && D.path.numbers.cols[0].includes("7wsk40qv") && D.path.numbers.rows[0][1] === "98", "PoB id, level and numbers column updated");
+ok(["helmet", "eye1", "block1", "rumi", "heralds", "immutable", "config", "asc"].every(id => A.pathSteps().find(x => x.step.id === id).step.pob === "done") && [3, 4, 5, 6, 7, 11].every(n => D.shop.find(i => i.n === n).done), "7wsk40qv: six new steps and their shop items marked done");
 // PoB weight sets: decode his helmet Find-best link, use it on the helmet card, and every helmet search carries it under the locks
 { const url = "https://www.pathofexile.com/trade/search/Allflame/H4sIAAAAAAAACqVW227bRhD9Fz4bi7lf9CtBIagOkxCQJYei2gaG_r3Y2GjtYCdwEL6QBBeHM-ecuTxNl-2wXS_T7mk6P27L-TTtpst8f10Pfx7n6Xb3_ftl2n14mrZvj_O0m_6el89ftulu-rQct3l9_rZ8nHbT42W-fjy359t-O2-H4_7Tss77db4sl-1wup-nu-mvw_E69_-9AO2yBbmZB7Oz0e1294I3__N4XO6XrfUY9kSuxJQ6wqBsjsiB6QFm_2MsD7-P8TYO49RUVBphcGNTVhIOT-AKg1UtSBJzBIJNLDMlySQcS0KEVdnScAQCTZJRQSADHUtarWfriUNKtCVwMgWohdbScIS6sPswHW9GhsTJoZ4lJ9ZZF3IZc-KqlGGSElrpK6hCmuLDbKyFAwShGASXgQhqsBOPk2lAQcJCEGhSGo3DhZjYxtpghJgDpAJwaRNSRHYIjHHdGJqiuRAmaAkSjGjKY16hoacxpgShQkkKIjOgaXKVEJuYplNClkZxF9AUGdYONBRjcQuzn0TCKAhdx6HG0EQYCZTIncjr4rEUNKdhBb4I1K0kEFGjOIZld8vYb2qWBr2lKEfpN1ACdqkSIuZeFukZ9pMaVMfIBBnKrI2ZiFgU0dJL20pQKGkUfQkE2Xs_QIvScJiZvY9SZbgUB2JGUxUpZWZCowQpWHkfigCqEULpuLQkV0A0gLLlEwNwZmiVEWCGs3cdodSZlTjMs9IZkwTRUTMiK4WYEz2hKkPt2XAwB0rdndhAUsz8F1F-YAWNIF3Gk_C9sSiJp7sUQ-ydobj0pmFYCAQhIL0fk6VKqRCJsCRRVDDk7JysYiZSTiHOCJZ0GE4QaIDJHgZMCap4u_3x6tjDcuqrCDTVblsBo_h-4r9163kT2796f_V4f9jmz-f125uF7rA-nK9r-zIfH-atL3XrYV22t2dO59P1tHy9ztOtX_8CH0ddxxkKAAA";
   const q = A.decodeTradeUrlSync(url); const set = A.pobWeightsFrom(q);
