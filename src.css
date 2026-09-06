@@ -25,6 +25,7 @@
   --color-warn: #fbbf24;
   --color-info: #38bdf8;
   --color-lock: #e879f9;
+  --color-bad: #f87171;
 }
 
 @layer base {
@@ -62,7 +63,7 @@
   .meta { @apply text-xs/5 text-ink-3; }
   .num { @apply font-mono tabular-nums; }
 
-  /* Badges — one meaning per colour: ok = have/yes, warn = craft/if cheap, info = option/spec, accent = buy now, lock = variant locked, muted = skip/granted. */
+  /* Badges — one meaning per colour: ok = have/yes/free to run, warn = craft/if cheap/danger, info = option/spec/watch, accent = buy now, lock = variant locked/map reward, muted = skip/granted/only slower, bad = never (map brick). */
   .badge { @apply inline-flex items-center gap-x-1.5 rounded-md px-2 py-1 text-xs font-medium whitespace-nowrap; }
   .badge-ok { @apply bg-ok/10 text-ok; }
   .badge-warn { @apply bg-warn/10 text-warn; }
@@ -70,6 +71,7 @@
   .badge-accent { @apply bg-accent/15 text-accent-text; }
   .badge-lock { @apply bg-lock/10 text-lock; }
   .badge-muted { @apply bg-white/10 text-ink-2; }
+  .badge-bad { @apply bg-bad/10 text-bad; }
 
   /* Nav */
   .nav-a { @apply flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-ink-3 transition-colors duration-150 hover:bg-white/5 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent; }

@@ -336,7 +336,35 @@ function shopUrl(item, st) {
   return null;
 }
 
-if (typeof module !== "undefined") module.exports = { rareQuery, rawQuery, uniqueQuery, flaskQuery, gemQuery, gemLinks, gemLinksAll, haveOf, clusterQuery, shopUrl, rareUrl, uniqueUrl, hashQuerySync, view, basePick, weightsFor, weightFilters, weightSource, pobWeightsFrom, decodeTradeUrlSync, minSumFor, budgetChaos, loadout, rollText, msFloor, autoFloor, exchangeQuery, exchangeUrl, pathSteps, stepDone, pathProgress, pathUrl, wkey, DEFAULTS };
+// ---- Maps: mod tiers, poe.re regexes, 8-mod buy links ----
+// A nightmare / 16.5 map rolls both pools (checked on live listings 06/09/2026); an ordinary T16 rolls the normal pool only.
+const mapMods = () => (D.maps ? D.maps.mods : []);
+const mapPoolMods = pool => mapMods().filter(m => pool === "nightmare" || m.pool === "normal");
+const mapProfile = key => (D.maps ? D.maps.profiles : []).find(p => p.key === key) || null;
+// Which mods a profile bans: Safe = brick + danger, Loose = brick + the lines flagged loose.
+const mapBanned = p => mapPoolMods(p.pool).filter(m => m.tier === "brick" || (p.strict === "loose" ? !!m.loose : m.tier === "danger"));
+// Unique trade stat ids for the "not" group (a mod's first id is enough — the group excludes on any match).
+const mapTradeIds = p => [...new Set(mapBanned(p).flatMap(m => m.trade.slice(0, 1)))];
+// The lines the game prints for a mod, at the low and the high roll ("(20-45)%" → "20%" / "45%").
+const mapLines = text => [false, true].flatMap(hi => text.split("|").map(l => l.replace(/\((-?\d+)-(-?\d+)\)/g, (m, a, b) => (hi ? b : a))));
+// The in-game search: each quoted term is its own regex, `!` negates, matching is per line and case-insensitive.
+function mapRegexTokens(regex) { const m = /^"!(.*?)" "!y: \(n\|m\)"$/.exec(regex); return m ? m[1].split("|") : null; }
+const mapRegexHits = (regex, text) => { const toks = mapRegexTokens(regex) || []; const lines = mapLines(text); return toks.filter(t => { const re = new RegExp(t, "i"); return lines.some(l => re.test(l)); }); };
+// Trade query for an 8-mod map search. l: { type | tier, moreMaps?, packMin?, profile }
+function mapQuery(l, st) {
+  const p = mapProfile(l.profile);
+  const and = [{ id: "pseudo.pseudo_number_of_prefix_mods", value: { min: 4 } }, { id: "pseudo.pseudo_number_of_suffix_mods", value: { min: 4 } }];
+  if (l.moreMaps) and.push({ id: "pseudo.pseudo_map_more_map_drops", value: { min: l.moreMaps } });
+  const q = { status: { option: st.status }, stats: [{ type: "and", filters: and }] };
+  if (p) q.stats.push({ type: "not", filters: mapTradeIds(p).map(i => ({ id: "explicit.stat_" + i })) });
+  if (l.type) q.type = l.type;
+  else q.filters = { type_filters: { filters: { category: { option: "map" } } }, map_filters: { filters: { map_tier: { min: l.tier || 16, max: l.tier || 16 } } }, misc_filters: { filters: { corrupted: { option: "true" } } } };
+  if (l.packMin) { q.filters = q.filters || {}; q.filters.map_filters = { filters: Object.assign({}, q.filters.map_filters && q.filters.map_filters.filters, { map_packsize: { min: l.packMin } }) }; }
+  return { query: q, sort: { price: "asc" } };
+}
+const mapUrl = (l, st) => url(st, mapQuery(l, st));
+
+if (typeof module !== "undefined") module.exports = { rareQuery, rawQuery, uniqueQuery, flaskQuery, gemQuery, gemLinks, gemLinksAll, haveOf, clusterQuery, shopUrl, rareUrl, uniqueUrl, hashQuerySync, view, basePick, weightsFor, weightFilters, weightSource, pobWeightsFrom, decodeTradeUrlSync, minSumFor, budgetChaos, loadout, rollText, msFloor, autoFloor, exchangeQuery, exchangeUrl, pathSteps, stepDone, pathProgress, pathUrl, wkey, DEFAULTS, mapMods, mapPoolMods, mapProfile, mapBanned, mapTradeIds, mapLines, mapRegexTokens, mapRegexHits, mapQuery, mapUrl };
 
 // ---------- DOM ----------
 if (typeof document !== "undefined") {
@@ -359,6 +387,7 @@ if (typeof document !== "undefined") {
     cart: "M3 4h2l2.5 11h10l2-7H7M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z",
     setup: "M4 6h16M4 12h16M4 18h10M18 16l2 2 3-3",
     path: "M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6ZM9 3v15M15 6v15",
+    maps: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM15.5 8.5l-2 5-5 2 2-5 5-2Z",
   };
   const icon = (k, cls) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="${cls || "size-5 shrink-0"}"><path d="${ICONS[k] || ICONS.jewel}"/></svg>`;
   // One meaning per colour: ok = have / yes · warn = craft / if cheap · info = option / spec · accent = buy now · lock = variant locked · muted = skip / granted.
@@ -791,13 +820,80 @@ if (typeof document !== "undefined") {
     main.querySelectorAll("[data-jump]").forEach(b => b.addEventListener("click", () => { const d = $("p-" + b.dataset.jump); if (!d) return; d.open = true; d.scrollIntoView({ block: "start", behavior: "smooth" }); const sm = d.querySelector("summary"); if (sm) sm.focus({ preventScroll: true }); }));
   }
 
+  // ---- Maps ----
+  // Tier badges: bad = never (brick) · warn = danger · info = watch · muted = only slower · ok = free to run.
+  const MTIER = { brick: "badge-bad", danger: "badge-warn", watch: "badge-info", dps: "badge-muted", free: "badge-ok" };
+  const modLines = text => esc(text).split("|").join(' <span class="text-ink-4">·</span> ');
+  const rewardBadge = m => m.reward ? badge(`+35% ${esc(m.reward)}`, "badge-lock") : "";
+  const mapTierMeta = Object.fromEntries((D.maps ? D.maps.tiers : []).map(([k, l, d]) => [k, { label: l, desc: d }]));
+  function mapProfileCard(p) {
+    const banned = mapBanned(p);
+    const li = h("li", "card"); li.setAttribute("aria-label", p.label);
+    li.innerHTML = `<div class="card-hd">
+        <div class="flex flex-wrap items-center gap-2"><h3 class="h3">${esc(p.label)}</h3>${p.pick ? badge("Roll with this one", "badge-accent") : ""}<span class="badge badge-muted num">${p.regex.length} / 250</span></div>
+        <p class="p3 prose-w mt-1">${esc(p.blurb)}</p>
+        <label class="mt-3 block"><span class="sr-only">${esc(p.label)} regex</span><textarea readonly rows="3" data-regex="${esc(p.key)}" class="field num min-h-0 resize-none text-xs/5 wrap-anywhere" spellcheck="false">${esc(p.regex)}</textarea></label>
+        <div class="mt-3 flex flex-wrap items-center gap-2"><button type="button" data-copy-text="${esc(p.regex)}" class="btn ${p.pick ? "btn-primary" : "btn-secondary"}">Copy regex</button><span class="meta">Bans <span class="num">${banned.length}</span> of <span class="num">${mapPoolMods(p.pool).length}</span> lines</span></div>
+      </div>
+      <details class="disc" id="d-map-${esc(p.key)}"><summary class="px-4 py-3 sm:px-6"><span>What it bans <span class="font-normal text-ink-3">(${banned.length}${p.also && p.also.length ? " + " + p.also.length + " side-effect" : ""})</span></span>${DISC_CHEV}</summary>
+        <ul role="list" class="rows border-t border-line">${banned.map(m => `<li class="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm/6">${badge(esc(mapTierMeta[m.tier].label), MTIER[m.tier])}<span class="min-w-0 text-ink-2">${modLines(m.text)}</span>${rewardBadge(m)}</li>`).join("")}${(p.also || []).map(id => mapMods().find(m => m.id === id)).filter(Boolean).map(m => `<li class="flex flex-wrap items-center gap-x-2 gap-y-1 py-2 text-sm/6">${badge("Side-effect", "badge-muted")}<span class="min-w-0 text-ink-2">${modLines(m.text)}</span></li>`).join("")}</ul>
+      </details>`;
+    const det = li.querySelector("details");
+    if (openDetails.has(det.id)) det.open = true;
+    det.addEventListener("toggle", () => { det.open ? openDetails.add(det.id) : openDetails.delete(det.id); });
+    li.querySelector("textarea").addEventListener("focus", e => e.target.select());
+    return li;
+  }
+  const mapFilter = {};
+  function mapPoolCard(pool) {
+    const mods = mapMods().filter(m => m.pool === pool);
+    const isNm = pool === "nightmare";
+    const sec = h("section", "card"); sec.setAttribute("aria-label", isNm ? "Nightmare pool" : "Normal pool");
+    const tiers = ["brick", "danger", "watch", "dps", "free"];
+    const counts = Object.fromEntries(tiers.map(t => [t, mods.filter(m => m.tier === t).length]));
+    const cur = mapFilter[pool] || "all";
+    sec.innerHTML = `<div class="card-hd">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"><h3 class="h3">${isNm ? "Nightmare pool" : "Normal pool"} <span class="font-normal text-ink-3">— ${mods.length} lines</span></h3><p class="meta">${isNm ? "Nightmare and 16.5 maps roll these on top of the normal pool" : "Every T16 rolls from here; nightmare maps too"}</p></div>
+        <div class="mt-3 flex flex-wrap gap-1" role="group" aria-label="Show tier">${[["all", "All", mods.length], ...tiers.map(t => [t, mapTierMeta[t].label, counts[t]])].map(([k, l, n]) => `<button type="button" data-tier="${k}" aria-pressed="${String(cur === k)}" class="seg btn-sm flex-none px-2.5 py-1.5"><span>${esc(l)}</span> <span class="num text-xs">${n}</span></button>`).join("")}</div>
+      </div>
+      <ul role="list" class="rows">${mods.map(m => `<li data-mod-tier="${m.tier}" class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 py-3"${cur !== "all" && cur !== m.tier ? " hidden" : ""}>
+          <div class="pt-0.5">${badge(esc(mapTierMeta[m.tier].label), MTIER[m.tier])}</div>
+          <div class="min-w-0"><p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm/6 font-medium text-ink"><span class="min-w-0">${modLines(m.text)}</span>${m.loose ? badge("Loose bans it too", "badge-warn") : ""}${rewardBadge(m)}${m.noRegex ? badge("No regex token", "badge-muted") : ""}</p><p class="p3 prose-w mt-0.5">${esc(m.why)}</p></div>
+        </li>`).join("")}</ul>`;
+    sec.querySelectorAll("[data-tier]").forEach(b => b.addEventListener("click", () => { mapFilter[pool] = b.dataset.tier; sec.querySelectorAll("[data-tier]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); sec.querySelectorAll("[data-mod-tier]").forEach(li => { li.hidden = b.dataset.tier !== "all" && li.dataset.modTier !== b.dataset.tier; }); }));
+    return sec;
+  }
+  function renderMaps(slot) {
+    const main = $("slot");
+    const M = D.maps; if (!M) return;
+    const intro = h("section", "card"); intro.setAttribute("aria-label", "About the map regexes");
+    intro.innerHTML = `<div class="card-hd"><div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"><h3 class="h3">Roll it</h3><p class="meta">Pools from ${esc(M.source)} · ${esc(M.updated)}</p></div><p class="p3 prose-w mt-1">${esc(M.intro)}</p></div>
+      <div class="px-4 py-4 sm:px-6"><p class="lbl">How to use one</p>${OLIST(M.use).replace('<ol class="', '<ol class="mt-2 ')}</div>`;
+    main.appendChild(intro);
+    const grid = h("ul", "grid grid-cols-1 gap-4 lg:grid-cols-2"); grid.setAttribute("role", "list"); grid.setAttribute("aria-label", "Regex profiles");
+    M.profiles.forEach(p => grid.appendChild(mapProfileCard(p)));
+    main.appendChild(grid);
+    const buy = h("section", "card"); buy.setAttribute("aria-label", "Buy 8-mod maps");
+    buy.innerHTML = `<div class="card-hd"><h3 class="h3">Buy 8-mod maps</h3><p class="p3 prose-w mt-1">${esc(M.buyNote)}</p></div>
+      <ul role="list" class="rows">${M.buy.map(l => `<li class="row"><div class="min-w-0 flex-1"><p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink"><span>${esc(l.label)}</span>${l.pick ? badge("Your search, made safe", "badge-accent") : ""}${l.count ? badge(esc(l.count), "badge-muted") : ""}</p><p class="p3 prose-w mt-1">${esc(l.why)}</p></div><div class="flex shrink-0 gap-2">${tlink(mapUrl(l, state), l.pick ? "btn-primary" : "btn-secondary", "Open")}</div></li>`).join("")}</ul>`;
+    main.appendChild(buy);
+    const legend = h("section", "card"); legend.setAttribute("aria-label", "Tiers");
+    legend.innerHTML = `<div class="card-hd"><h3 class="h3">Every line that can roll, tiered for this character</h3><p class="p3 prose-w mt-1">Numbers behind the tiers: 4,738 ES, 3,555 armour, 7.7k physical max hit, fire only 13 over cap, 75% spell block, ES from 395/s regen plus 825/s leech, 88 unreserved mana against a 135/s EK bill, chaos immune, 100% elemental ailment avoidance.</p></div>
+      <dl class="grid grid-cols-1 gap-x-8 gap-y-2 px-4 py-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-5">${M.tiers.map(([k, l, d]) => `<div class="flex items-start gap-2"><dt class="shrink-0">${badge(esc(l), MTIER[k])}</dt><dd class="p3">${esc(d)}</dd></div>`).join("")}</dl>`;
+    main.appendChild(legend);
+    main.appendChild(mapPoolCard("normal"));
+    main.appendChild(mapPoolCard("nightmare"));
+    main.querySelectorAll("[data-copy-text]").forEach(b => b.addEventListener("click", async () => { try { await navigator.clipboard.writeText(b.dataset.copyText); toast("Regex copied — paste it into the map tab search"); } catch (e) { const ta = b.closest(".card").querySelector("textarea"); if (ta) { ta.focus(); ta.select(); } toast("Couldn't reach the clipboard — the text is selected, press Ctrl+C"); } }));
+  }
+
   function renderSlot() {
     const slot = slotByKey(state.slot) || D.slots[0];
     const main = $("slot"); main.innerHTML = "";
     $("slot-title").textContent = slot.label;
     $("mob-title").textContent = slot.label;
-    const sub = $("slot-sub"); if (sub) sub.textContent = slot.shopTab || slot.gemsTab || slot.setupTab ? "" : slot.pathTab ? `Your PoB ${D.pob.now} → fubgun ${D.pob.budget}` : `${isMirror(state) ? "Mirror" : "Budget"} spec · ${isMirror(state) ? D.pob.mirror : D.pob.budget}`;
+    const sub = $("slot-sub"); if (sub) sub.textContent = slot.shopTab || slot.gemsTab || slot.setupTab ? "" : slot.pathTab ? `Your PoB ${D.pob.now} → fubgun ${D.pob.budget}` : slot.mapsTab ? `Regexes and 8-mod buy links · ${D.maps ? D.maps.updated : ""}` : `${isMirror(state) ? "Mirror" : "Budget"} spec · ${isMirror(state) ? D.pob.mirror : D.pob.budget}`;
     if (slot.pathTab) { renderPath(slot); return; }
+    if (slot.mapsTab) { renderMaps(slot); return; }
     if (slot.gemsTab) { renderGems(slot); return; }
     if (slot.shopTab) { renderShop(slot); return; }
     if (slot.setupTab) { renderSetup(slot); return; }
