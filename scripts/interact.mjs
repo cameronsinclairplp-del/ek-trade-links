@@ -138,6 +138,32 @@ const url = 'file://' + path.join(root, 'index.html');
   ok(errs.length === 0, `no page errors on the PoB flow (${errs.join('; ')})`);
   await page.close();
 }
+// --- Maps: four regex cards with copy, tier filter on the pool tables, 8-mod buy links carry the ban list
+{
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, permissions: ['clipboard-read', 'clipboard-write'] });
+  const page = await ctx.newPage(); await page.route(/^https?:\/\//, r => r.abort());
+  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  await page.goto(url + '#maps'); await page.waitForTimeout(300);
+  const gunzip = (await import('node:zlib')).gunzipSync;
+  const dec = u => JSON.parse(gunzip(Buffer.from(u.split('/').pop().replace(/-/g, '+').replace(/_/g, '/'), 'base64')).toString());
+  const m1 = await page.evaluate(() => ({ title: document.getElementById('slot-title').textContent, cards: document.querySelectorAll('#slot textarea[data-regex]').length, lens: [...document.querySelectorAll('#slot textarea[data-regex]')].map(t => t.value.length), rows: document.querySelectorAll('#slot [data-mod-tier]').length, links: [...document.querySelectorAll('#slot a[href^="https"]')].map(a => a.href), pending: document.querySelectorAll('#slot a.is-pending').length }));
+  ok(m1.title === 'Maps' && m1.cards === 4 && m1.lens.every(n => n <= 250) && m1.rows === 122, `Maps tab: ${m1.cards} regex cards (${m1.lens.join('/')} chars), ${m1.rows} mod rows`);
+  const qs = m1.links.map(dec);
+  ok(m1.pending === 0 && qs.length >= 6 && qs.every(q => q.stats[1].type === 'not' && q.stats[1].filters.length >= 8 && q.stats[0].filters[0].value.min === 4) && qs.some(q => q.type === 'Nightmare Map') && qs.some(q => q.filters && q.filters.map_filters.filters.map_tier.min === 16), `${qs.length} buy links hydrated: 8-mod lock + ban list on every one (${qs.map(q => q.stats[1].filters.length).join('/')} banned)`);
+  await page.click('#slot [data-copy-text]'); await page.waitForTimeout(200);
+  const c1 = await page.evaluate(async () => ({ clip: await navigator.clipboard.readText(), toast: document.getElementById('toast').textContent, hidden: document.getElementById('toast').hidden }));
+  ok(/^"!te of\|lier\$/.test(c1.clip) && / "!y: \(n\|m\)"$/.test(c1.clip) && !c1.hidden && /Regex copied/.test(c1.toast), `Copy regex → clipboard has the T16 Safe string (${c1.clip.length} chars), toast "${c1.toast}"`);
+  await page.click('#slot section[aria-label="Normal pool"] [data-tier="brick"]'); await page.waitForTimeout(100);
+  const f1 = await page.evaluate(() => { const sec = document.querySelector('#slot section[aria-label="Normal pool"]'); return { shown: [...sec.querySelectorAll('[data-mod-tier]')].filter(li => !li.hidden).length, tiers: [...new Set([...sec.querySelectorAll('[data-mod-tier]')].filter(li => !li.hidden).map(li => li.dataset.modTier))], pressed: sec.querySelector('[data-tier][aria-pressed="true"]').dataset.tier, other: document.querySelectorAll('#slot section[aria-label="Nightmare pool"] [data-mod-tier]:not([hidden])').length }; });
+  ok(f1.shown === 4 && f1.tiers.join() === 'brick' && f1.pressed === 'brick' && f1.other === 44, `tier filter: Brick shows the 4 normal-pool bricks, nightmare table untouched (${f1.other})`);
+  await page.evaluate(() => { document.querySelector('#d-map-nm-safe').open = true; });
+  const b1 = await page.evaluate(() => document.querySelectorAll('#d-map-nm-safe li').length);
+  ok(b1 === 40, `Nightmare Safe "what it bans" lists 40 lines (${b1})`);
+  const t1 = await page.evaluate(() => { const t = document.querySelector('#slot textarea[data-regex]'); t.focus(); return { sel: t.selectionEnd - t.selectionStart, len: t.value.length }; });
+  ok(t1.sel === t1.len, 'focusing a regex box selects all of it');
+  ok(errs.length === 0, `no page errors on Maps (${errs.join('; ')})`);
+  await ctx.close();
+}
 // --- reduced motion
 {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });

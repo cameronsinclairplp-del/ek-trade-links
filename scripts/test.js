@@ -115,5 +115,42 @@ ok(D.pob.now === "glis80qp" && A.DEFAULTS.level === 97, "PoB id and level update
   const blk = A.rawQuery(jewel.rare.extra[2].query, A.DEFAULTS, jewel).query; ok(blk.stats[0].filters.some(f => f.id === D.S.staffBlock.id), "block-jewel extra uses the jewel weights");
   for (const s of D.slots) if (s.rare) for (const x of s.rare.extra || []) { const qq = A.rawQuery(x.query, A.DEFAULTS, s, x.wgroup).query; ok(qq.stats[0].type === "weight2" && qq.stats[0].filters.length > 0 && JSON.stringify(qq).length < 8000, `${s.key} extra '${x.label.slice(0, 30)}' is weighted`); }
   ok(A.rawQuery({ stats: [] }, A.DEFAULTS).query.stats.length === 0, "raw query without a slot stays unweighted"); }
+// Maps: every mod tiered with a reason, pools sized, regexes poe.re-shaped and under 250, and each regex bans exactly its list
+{
+  const M = D.maps; ok(M && M.mods.length === 122 && M.profiles.length === 4 && M.buy.length >= 4, "maps: block present");
+  const TIERS = ["brick", "danger", "watch", "dps", "free"];
+  const ids = new Set();
+  for (const m of M.mods) { ok(!ids.has(m.id), `maps: duplicate id ${m.id}`); ids.add(m.id); ok(TIERS.includes(m.tier) && m.why && m.text && ["normal", "nightmare"].includes(m.pool) && Array.isArray(m.trade), `maps: mod ${m.id} incomplete`); for (const t of m.trade) ok(/^\d+$/.test(t), `maps: bad trade id ${t} on ${m.id}`); ok(!(m.tier === "brick" || m.tier === "danger") || m.trade.length, `maps: banned mod ${m.id} has no trade id`); ok(!m.loose || m.tier === "danger", `maps: loose flag on a non-danger mod ${m.id}`); }
+  ok(M.mods.filter(m => m.pool === "normal").length === 78 && M.mods.filter(m => m.pool === "nightmare").length === 44, "maps: pool sizes");
+  ok(A.mapPoolMods("normal").length === 78 && A.mapPoolMods("nightmare").length === 122, "maps: nightmare rolls both pools");
+  for (const p of M.profiles) {
+    const toks = A.mapRegexTokens(p.regex); ok(toks && toks.length, `maps ${p.key}: regex shape`);
+    ok(p.regex.length <= 250, `maps ${p.key}: over 250 (${p.regex.length})`);
+    const banned = new Set(A.mapBanned(p).map(m => m.id)); for (const id of (p.also || [])) banned.add(id);
+    const used = new Set();
+    for (const m of A.mapPoolMods(p.pool)) {
+      if (m.noRegex) continue;
+      const hits = A.mapRegexHits(p.regex, m.text); hits.forEach(t => used.add(t));
+      ok(!!hits.length === banned.has(m.id), `maps ${p.key}: ${banned.has(m.id) ? "misses banned" : "bans a good"} line "${m.text.slice(0, 50)}" (${hits.join(", ")})`);
+    }
+    ok(toks.every(t => used.has(t)), `maps ${p.key}: unused token ${toks.filter(t => !used.has(t)).join(", ")}`);
+    ok(A.mapBanned(p).every(m => m.tier === "brick" || (p.strict === "loose" ? m.loose : m.tier === "danger")), `maps ${p.key}: ban rule`);
+    ok(A.mapBanned(p).filter(m => m.tier === "brick").length === A.mapPoolMods(p.pool).filter(m => m.tier === "brick").length, `maps ${p.key}: every brick banned`);
+  }
+  ok(A.mapBanned(A.mapProfile("t16-safe")).length === 15 && A.mapBanned(A.mapProfile("t16-loose")).length === 8 && A.mapBanned(A.mapProfile("nm-safe")).length === 40 && A.mapBanned(A.mapProfile("nm-loose")).length === 20, "maps: ban counts");
+  ok(A.mapTradeIds(A.mapProfile("nm-safe")).length === 33 && A.mapTradeIds(A.mapProfile("t16-safe")).length === 15, "maps: trade id counts (33 accepted live 06/09)");
+  for (const l of M.buy) {
+    const r = A.mapQuery(l, A.DEFAULTS), q = r.query;
+    ok(q.stats[0].type === "and" && q.stats[0].filters[0].id === "pseudo.pseudo_number_of_prefix_mods" && q.stats[0].filters[1].value.min === 4, `maps buy ${l.key}: 8-mod lock`);
+    ok(q.stats[1].type === "not" && q.stats[1].filters.length === A.mapTradeIds(A.mapProfile(l.profile)).length, `maps buy ${l.key}: not group`);
+    ok(!l.moreMaps || q.stats[0].filters.some(f => f.id === "pseudo.pseudo_map_more_map_drops" && f.value.min === l.moreMaps), `maps buy ${l.key}: more maps`);
+    ok(l.type ? q.type === l.type : q.filters.map_filters.filters.map_tier.min === 16 && q.filters.misc_filters.filters.corrupted.option === "true" && q.filters.type_filters.filters.category.option === "map", `maps buy ${l.key}: type / tier`);
+    ok(!q.filters || !q.filters.trade_filters, `maps buy ${l.key}: no price cap on maps`);
+    const u = A.mapUrl(l, A.DEFAULTS); ok(/^https:\/\/www\.pathofexile\.com\/trade\/search\/Allflame\/[A-Za-z0-9_-]+$/.test(u), `maps buy ${l.key}: url`);
+    ok(l.label && l.why && l.profile && A.mapProfile(l.profile), `maps buy ${l.key}: incomplete`);
+  }
+  ok(A.mapQuery({ tier: 16, profile: "t16-safe", packMin: 35 }, A.DEFAULTS).query.filters.map_filters.filters.map_packsize.min === 35, "maps: pack size option");
+  ok(D.slots.find(s => s.key === "maps" && s.mapsTab), "maps: slot");
+}
 console.log(fails ? `${fails} failure(s)` : "all checks passed");
 process.exit(fails ? 1 : 0);
